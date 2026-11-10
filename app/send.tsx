@@ -17,7 +17,6 @@ import {
   DotsThree,
   Info,
   CheckCircle,
-  ArrowRight,
   Backspace,
 } from 'phosphor-react-native';
 import { useColorScheme } from 'nativewind';
@@ -28,11 +27,13 @@ import { useRecipientStore } from '../store/recipientStore';
 import { useTransactionStore } from '../store/transactionStore';
 import { Recipient } from '../types/models';
 import { Money } from '../utils/money';
+import { getTheme } from '../constants/theme';
 
 export default function SendScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const { cards, adjustBalance } = useWalletStore();
   const { recipients, touchRecipient, addRecipient } = useRecipientStore();
@@ -148,7 +149,7 @@ export default function SendScreen() {
     <SafeAreaView
       style={[
         styles.safeArea,
-        isDark ? styles.canvasDark : styles.canvasLight,
+        { backgroundColor: theme.ground },
       ]}
       edges={['top', 'bottom']}
     >
@@ -159,10 +160,10 @@ export default function SendScreen() {
             onPress={() => router.back()}
             style={styles.closeButton}
           >
-            <X size={22} color={isDark ? '#F2F7F4' : '#0E1A13'} weight="bold" />
+            <X size={22} color={theme.ink} weight="bold" />
           </Pressable>
 
-          <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
+          <Text style={[styles.headerTitle, { color: theme.ink }]}>
             {step === 'recipient' && 'Send to'}
             {step === 'amount' && 'Amount'}
             {step === 'pin' && 'Enter PIN'}
@@ -172,7 +173,7 @@ export default function SendScreen() {
           <View style={styles.headerSpacer} />
         </View>
 
-        {/* 4-step progress indicator bar matching reference */}
+        {/* 4-step progress indicator bar */}
         <View style={styles.stepperRow}>
           {[0, 1, 2, 3].map((idx) => {
             const stepIndex =
@@ -183,9 +184,9 @@ export default function SendScreen() {
                 key={idx}
                 style={[
                   styles.stepperBar,
-                  isCompletedOrActive
-                    ? (isDark ? styles.stepperActiveDark : styles.stepperActiveLight)
-                    : (isDark ? styles.stepperInactiveDark : styles.stepperInactiveLight),
+                  {
+                    backgroundColor: isCompletedOrActive ? theme.accent : theme.rule,
+                  },
                 ]}
               />
             );
@@ -200,18 +201,21 @@ export default function SendScreen() {
           <View
             style={[
               styles.searchBox,
-              isDark ? styles.searchBoxDark : styles.searchBoxLight,
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+              },
             ]}
           >
-            <Text style={[styles.atSymbol, isDark && styles.atSymbolDark]}>@</Text>
+            <Text style={[styles.atSymbol, { color: theme.ink2 }]}>@</Text>
             <TextInput
               placeholder="Handle, email or name"
-              placeholderTextColor={isDark ? '#8A9C91' : '#8A968E'}
+              placeholderTextColor={theme.ink3}
               value={search}
               onChangeText={setSearch}
               style={[
                 styles.searchInput,
-                isDark ? styles.searchInputDark : styles.searchInputLight,
+                { color: theme.ink },
               ]}
             />
           </View>
@@ -221,7 +225,7 @@ export default function SendScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
           >
-            <Text style={[styles.sectionLabel, isDark && styles.sectionLabelDark]}>
+            <Text style={[styles.sectionLabel, { color: theme.ink2 }]}>
               Recent
             </Text>
 
@@ -241,20 +245,25 @@ export default function SendScreen() {
                     onPress={() => handleSelectRecipient(r)}
                     style={[
                       styles.recipientRow,
-                      isSelected && (isDark ? styles.rowSelectedDark : styles.rowSelectedLight),
+                      {
+                        backgroundColor: isSelected ? theme.accentSoft : theme.raised,
+                        borderColor: isSelected ? theme.accent : theme.rule,
+                      },
                     ]}
                   >
                     {/* Circle Avatar */}
                     <View
                       style={[
                         styles.avatarCircle,
-                        isDark ? styles.avatarDark : styles.avatarLight,
+                        {
+                          backgroundColor: isSelected ? theme.accentSoft : theme.raisedSubtle,
+                        },
                       ]}
                     >
                       <Text
                         style={[
                           styles.avatarText,
-                          isDark ? styles.avatarTextDark : styles.avatarTextLight,
+                          { color: isSelected ? theme.accent : theme.ink },
                         ]}
                       >
                         {initials}
@@ -263,10 +272,10 @@ export default function SendScreen() {
 
                     {/* Metadata */}
                     <View style={styles.metaCol}>
-                      <Text style={[styles.nameText, isDark && styles.nameTextDark]}>
+                      <Text style={[styles.nameText, { color: theme.ink }]}>
                         {r.name}
                       </Text>
-                      <Text style={[styles.handleText, isDark && styles.handleTextDark]}>
+                      <Text style={[styles.handleText, { color: theme.ink2 }]}>
                         {r.handle}
                       </Text>
                     </View>
@@ -274,11 +283,11 @@ export default function SendScreen() {
                     {/* Right action icons */}
                     <View style={styles.rightActions}>
                       {!r.verified && (
-                        <Info size={18} color="#B45309" weight="bold" />
+                        <Info size={18} color="#D97706" weight="bold" />
                       )}
                       <DotsThree
                         size={22}
-                        color={isDark ? '#8A9C91' : '#5C6A61'}
+                        color={theme.ink2}
                         weight="bold"
                       />
                     </View>
@@ -314,20 +323,18 @@ export default function SendScreen() {
               }}
               style={[
                 styles.addRecipientCard,
-                isDark ? styles.addRecipientDark : styles.addRecipientLight,
+                {
+                  backgroundColor: theme.raised,
+                  borderColor: theme.rule,
+                },
               ]}
             >
               <UserPlus
                 size={20}
-                color={isDark ? '#F2F7F4' : '#0E1A13'}
+                color={theme.ink}
                 weight="bold"
               />
-              <Text
-                style={[
-                  styles.addRecipientText,
-                  isDark && styles.addRecipientTextDark,
-                ]}
-              >
+              <Text style={[styles.addRecipientText, { color: theme.ink }]}>
                 Add a recipient
               </Text>
             </Pressable>
@@ -338,11 +345,13 @@ export default function SendScreen() {
             onPress={handleContinueToAmount}
             style={({ pressed }) => [
               styles.continueButton,
-              isDark ? styles.continueBtnDark : styles.continueBtnLight,
-              { opacity: pressed ? 0.9 : 1 },
+              {
+                backgroundColor: theme.accent,
+                opacity: pressed ? 0.88 : 1,
+              },
             ]}
           >
-            <Text style={styles.continueText}>Continue</Text>
+            <Text style={[styles.continueText, { color: theme.onAccent }]}>Continue</Text>
           </Pressable>
         </View>
       )}
@@ -351,13 +360,13 @@ export default function SendScreen() {
       {step === 'amount' && (
         <View style={styles.contentContainer}>
           <View style={styles.amountHeaderSection}>
-            <Text style={[styles.sendingToText, isDark && styles.sendingToDark]}>
-              Sending to <Text style={styles.boldWhite}>{selectedRecipient?.name}</Text>
+            <Text style={[styles.sendingToText, { color: theme.ink2 }]}>
+              Sending to <Text style={[styles.boldName, { color: theme.ink }]}>{selectedRecipient?.name}</Text>
             </Text>
-            <Text style={[styles.amountDisplay, isDark && styles.amountDisplayDark]}>
+            <Text style={[styles.amountDisplay, { color: theme.ink }]}>
               ${amountInput}.00
             </Text>
-            <Text style={[styles.cardDebitText, isDark && styles.cardDebitDark]}>
+            <Text style={[styles.cardDebitText, { color: theme.ink2 }]}>
               From {activeCard?.nickname} · •••• {activeCard?.last4}
             </Text>
           </View>
@@ -378,9 +387,15 @@ export default function SendScreen() {
                       <Pressable
                         key={cIdx}
                         onPress={handleAmountBackspace}
-                        style={styles.keyCard}
+                        style={[
+                          styles.keyCard,
+                          {
+                            backgroundColor: theme.raised,
+                            borderColor: theme.rule,
+                          },
+                        ]}
                       >
-                        <Backspace size={24} color="#0E1A13" />
+                        <Backspace size={24} color={theme.ink} weight="bold" />
                       </Pressable>
                     );
                   }
@@ -388,9 +403,15 @@ export default function SendScreen() {
                     <Pressable
                       key={cIdx}
                       onPress={() => handleAmountKey(val)}
-                      style={styles.keyCard}
+                      style={[
+                        styles.keyCard,
+                        {
+                          backgroundColor: theme.raised,
+                          borderColor: theme.rule,
+                        },
+                      ]}
                     >
-                      <Text style={styles.keyText}>{val}</Text>
+                      <Text style={[styles.keyText, { color: theme.ink }]}>{val}</Text>
                     </Pressable>
                   );
                 })}
@@ -400,9 +421,15 @@ export default function SendScreen() {
 
           <Pressable
             onPress={handleConfirmAmount}
-            style={[styles.continueButton, styles.continueBtnLight]}
+            style={({ pressed }) => [
+              styles.continueButton,
+              {
+                backgroundColor: theme.accent,
+                opacity: pressed ? 0.88 : 1,
+              },
+            ]}
           >
-            <Text style={styles.continueText}>Review & Send</Text>
+            <Text style={[styles.continueText, { color: theme.onAccent }]}>Review & Send</Text>
           </Pressable>
         </View>
       )}
@@ -411,13 +438,13 @@ export default function SendScreen() {
       {step === 'pin' && (
         <View style={styles.contentContainer}>
           <View style={styles.amountHeaderSection}>
-            <Text style={[styles.sendingToText, isDark && styles.sendingToDark]}>
+            <Text style={[styles.sendingToText, { color: theme.ink2 }]}>
               Confirm Transfer
             </Text>
-            <Text style={[styles.amountDisplay, isDark && styles.amountDisplayDark]}>
+            <Text style={[styles.amountDisplay, { color: theme.ink }]}>
               ${amountInput}.00
             </Text>
-            <Text style={[styles.cardDebitText, isDark && styles.cardDebitDark]}>
+            <Text style={[styles.cardDebitText, { color: theme.ink2 }]}>
               Enter your 4-digit security PIN
             </Text>
 
@@ -428,7 +455,10 @@ export default function SendScreen() {
                   key={i}
                   style={[
                     styles.pinCircle,
-                    i < pin.length && styles.pinCircleFilled,
+                    {
+                      borderColor: i < pin.length ? theme.accent : theme.rule,
+                      backgroundColor: i < pin.length ? theme.accent : 'transparent',
+                    },
                   ]}
                 />
               ))}
@@ -451,9 +481,15 @@ export default function SendScreen() {
                       <Pressable
                         key={cIdx}
                         onPress={handlePinBackspace}
-                        style={styles.keyCard}
+                        style={[
+                          styles.keyCard,
+                          {
+                            backgroundColor: theme.raised,
+                            borderColor: theme.rule,
+                          },
+                        ]}
                       >
-                        <Backspace size={24} color="#0E1A13" />
+                        <Backspace size={24} color={theme.ink} weight="bold" />
                       </Pressable>
                     );
                   }
@@ -461,9 +497,15 @@ export default function SendScreen() {
                     <Pressable
                       key={cIdx}
                       onPress={() => handlePinDigit(val)}
-                      style={styles.keyCard}
+                      style={[
+                        styles.keyCard,
+                        {
+                          backgroundColor: theme.raised,
+                          borderColor: theme.rule,
+                        },
+                      ]}
                     >
-                      <Text style={styles.keyText}>{val}</Text>
+                      <Text style={[styles.keyText, { color: theme.ink }]}>{val}</Text>
                     </Pressable>
                   );
                 })}
@@ -477,20 +519,27 @@ export default function SendScreen() {
       {step === 'success' && (
         <View style={[styles.contentContainer, styles.successCenter]}>
           <View style={styles.successBadge}>
-            <CheckCircle size={64} color="#204E35" weight="fill" />
+            <CheckCircle size={64} color={theme.positive} weight="fill" />
           </View>
-          <Text style={[styles.successTitle, isDark && styles.successTitleDark]}>
-            Transfer Sent!
+          <Text style={[styles.successTitle, { color: theme.ink }]}>
+            Transfer Sent
           </Text>
-          <Text style={[styles.successSub, isDark && styles.successSubDark]}>
-            ${amountInput}.00 has been sent to {selectedRecipient?.name}.
+          <Text style={[styles.successSub, { color: theme.ink2 }]}>
+            ${amountInput}.00 successfully transferred to {selectedRecipient?.name} ({selectedRecipient?.handle}).
           </Text>
 
           <Pressable
             onPress={() => router.back()}
-            style={[styles.continueButton, styles.continueBtnLight, { width: '100%', marginTop: 32 }]}
+            style={({ pressed }) => [
+              styles.continueButton,
+              {
+                backgroundColor: theme.accent,
+                opacity: pressed ? 0.88 : 1,
+                marginTop: 32,
+              },
+            ]}
           >
-            <Text style={styles.continueText}>Done</Text>
+            <Text style={[styles.continueText, { color: theme.onAccent }]}>Done</Text>
           </Pressable>
         </View>
       )}
@@ -502,16 +551,10 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  canvasLight: {
-    backgroundColor: '#F4F3EF',
-  },
-  canvasDark: {
-    backgroundColor: '#0E1612',
-  },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 14,
+    paddingTop: 10,
+    paddingBottom: 12,
   },
   headerTop: {
     flexDirection: 'row',
@@ -520,44 +563,27 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   closeButton: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0E1A13',
-    letterSpacing: -0.3,
-  },
-  headerTitleDark: {
-    color: '#F2F7F4',
+    letterSpacing: -0.2,
   },
   headerSpacer: {
-    width: 36,
+    width: 38,
   },
   stepperRow: {
     flexDirection: 'row',
     gap: 8,
-    paddingHorizontal: 4,
   },
   stepperBar: {
     flex: 1,
     height: 3.5,
     borderRadius: 2,
-  },
-  stepperActiveLight: {
-    backgroundColor: '#204E35',
-  },
-  stepperActiveDark: {
-    backgroundColor: '#4ADE80',
-  },
-  stepperInactiveLight: {
-    backgroundColor: '#E2E0D6',
-  },
-  stepperInactiveDark: {
-    backgroundColor: '#26342B',
   },
   contentContainer: {
     flex: 1,
@@ -568,68 +594,42 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 52,
     borderRadius: 16,
     paddingHorizontal: 16,
+    height: 52,
+    marginBottom: 16,
     borderWidth: 1,
-    marginTop: 6,
-    marginBottom: 10,
-  },
-  searchBoxLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E2E0D8',
-  },
-  searchBoxDark: {
-    backgroundColor: '#16201B',
-    borderColor: '#26342B',
   },
   atSymbol: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#5C6A61',
     marginRight: 10,
-  },
-  atSymbolDark: {
-    color: '#8A9C91',
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
-  },
-  searchInputLight: {
-    color: '#0E1A13',
-  },
-  searchInputDark: {
-    color: '#F2F7F4',
+    fontWeight: '500',
   },
   listContent: {
-    paddingBottom: 16,
+    paddingBottom: 24,
   },
   sectionLabel: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#5C6A61',
-    marginBottom: 8,
-    paddingLeft: 4,
-  },
-  sectionLabelDark: {
-    color: '#8A9C91',
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 10,
+    letterSpacing: 0.2,
   },
   recipientsList: {
-    gap: 4,
+    gap: 8,
+    marginBottom: 14,
   },
   recipientRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 16,
-  },
-  rowSelectedLight: {
-    backgroundColor: '#E2EDE6',
-  },
-  rowSelectedDark: {
-    backgroundColor: '#1E3527',
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    borderWidth: 1,
   },
   avatarCircle: {
     width: 44,
@@ -637,23 +637,11 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
-  },
-  avatarLight: {
-    backgroundColor: '#D6E6DC',
-  },
-  avatarDark: {
-    backgroundColor: '#1C3827',
+    marginRight: 12,
   },
   avatarText: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '800',
-  },
-  avatarTextLight: {
-    color: '#204E35',
-  },
-  avatarTextDark: {
-    color: '#4ADE80',
   },
   metaCol: {
     flex: 1,
@@ -661,18 +649,11 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0E1A13',
     marginBottom: 2,
-  },
-  nameTextDark: {
-    color: '#F2F7F4',
   },
   handleText: {
     fontSize: 13,
-    color: '#5C6A61',
-  },
-  handleTextDark: {
-    color: '#8A9C91',
+    fontWeight: '500',
   },
   rightActions: {
     flexDirection: 'row',
@@ -683,95 +664,63 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 52,
-    borderRadius: 16,
+    borderRadius: 18,
+    paddingVertical: 14,
     borderWidth: 1,
-    marginTop: 16,
-    gap: 10,
-  },
-  addRecipientLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E2E0D8',
-  },
-  addRecipientDark: {
-    backgroundColor: '#16201B',
-    borderColor: '#26342B',
+    gap: 8,
+    marginTop: 4,
   },
   addRecipientText: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '700',
-    color: '#0E1A13',
-  },
-  addRecipientTextDark: {
-    color: '#F2F7F4',
   },
   continueButton: {
-    height: 52,
-    borderRadius: 26,
+    height: 54,
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
-  },
-  continueBtnLight: {
-    backgroundColor: '#204E35',
-  },
-  continueBtnDark: {
-    backgroundColor: '#225B3C',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 3,
   },
   continueText: {
-    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.2,
   },
   amountHeaderSection: {
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 20,
+    paddingVertical: 24,
   },
   sendingToText: {
     fontSize: 14,
-    color: '#5C6A61',
-    marginBottom: 6,
+    fontWeight: '500',
+    marginBottom: 8,
   },
-  sendingToDark: {
-    color: '#8A9C91',
-  },
-  boldWhite: {
-    fontWeight: '700',
-    color: '#0E1A13',
+  boldName: {
+    fontWeight: '800',
   },
   amountDisplay: {
     fontSize: 44,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -1,
-  },
-  amountDisplayDark: {
-    color: '#F2F7F4',
   },
   cardDebitText: {
     fontSize: 13,
-    color: '#5C6A61',
-    marginTop: 4,
-  },
-  cardDebitDark: {
-    color: '#8A9C91',
+    marginTop: 6,
   },
   pinCirclesRow: {
     flexDirection: 'row',
     gap: 16,
-    marginTop: 20,
+    marginTop: 24,
   },
   pinCircle: {
     width: 14,
     height: 14,
     borderRadius: 7,
     borderWidth: 1.5,
-    borderColor: '#738077',
-  },
-  pinCircleFilled: {
-    backgroundColor: '#204E35',
-    borderColor: '#204E35',
   },
   keypadWrapper: {
     gap: 10,
@@ -784,12 +733,15 @@ const styles = StyleSheet.create({
   keyCard: {
     flex: 1,
     height: 58,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E0D8',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   keyEmpty: {
     flex: 1,
@@ -797,7 +749,6 @@ const styles = StyleSheet.create({
   keyText: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#0E1A13',
   },
   successCenter: {
     justifyContent: 'center',
@@ -809,19 +760,12 @@ const styles = StyleSheet.create({
   successTitle: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#0E1A13',
     marginBottom: 8,
-  },
-  successTitleDark: {
-    color: '#F2F7F4',
   },
   successSub: {
     fontSize: 15,
-    color: '#5C6A61',
     textAlign: 'center',
     lineHeight: 22,
-  },
-  successSubDark: {
-    color: '#8A9C91',
+    maxWidth: 280,
   },
 });

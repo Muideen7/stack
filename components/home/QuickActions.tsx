@@ -4,6 +4,7 @@ import { useColorScheme } from 'nativewind';
 import { ArrowUpRight, ArrowsLeftRight, DotsThree, Plus } from 'phosphor-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { getTheme } from '../../constants/theme';
 
 interface QuickActionsProps {
   onSend: () => void;
@@ -20,6 +21,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
 }) => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const actions = [
     { label: 'Add', icon: Plus, action: onAddCard },
@@ -27,8 +29,6 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
     { label: 'Convert', icon: ArrowsLeftRight, action: onConvert },
     { label: 'More', icon: DotsThree, action: onMore },
   ];
-
-  const iconColor = isDark ? '#E5EDE7' : '#1C2E23';
 
   return (
     <View style={styles.container}>
@@ -49,19 +49,22 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
             <View
               style={[
                 styles.iconBox,
-                isDark ? styles.iconBoxDark : styles.iconBoxLight,
+                {
+                  backgroundColor: theme.raisedSubtle,
+                  borderColor: theme.rule,
+                },
               ]}
             >
               <IconComponent
                 size={22}
-                color={iconColor}
-                weight={item.label === 'More' ? 'bold' : 'bold'}
+                color={theme.ink}
+                weight="bold"
               />
             </View>
             <Text
               style={[
                 styles.actionLabel,
-                { color: isDark ? '#95A69B' : '#4C5850' },
+                { color: theme.ink2 },
               ]}
             >
               {item.label}
@@ -77,7 +80,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 12,
+    marginVertical: 14,
   },
   actionItem: {
     alignItems: 'center',
@@ -90,16 +93,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
-  },
-  iconBoxLight: {
-    backgroundColor: '#EBE9E2',
-  },
-  iconBoxDark: {
-    backgroundColor: '#202B24',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   actionLabel: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '600',
+    letterSpacing: -0.1,
   },
 });
-

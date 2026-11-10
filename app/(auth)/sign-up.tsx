@@ -4,14 +4,19 @@ import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, AppleLogo, GoogleLogo, User, EnvelopeSimple, LockSimple } from 'phosphor-react-native';
+import { useColorScheme } from 'nativewind';
 import * as Haptics from '@/utils/haptics';
 
 import { AuthBackdrop } from '../../components/auth/AuthBackdrop';
 import { StackMark } from '../../components/common/StackMark';
 import { AuthField } from '../../components/auth/AuthField';
+import { getTheme } from '../../constants/theme';
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -36,9 +41,9 @@ export default function SignUpScreen() {
         {/* Top Header: Back Arrow on Left & Logo on Right */}
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
-            <ArrowLeft size={22} color="#1A241E" />
+            <ArrowLeft size={22} color={theme.ink} />
           </Pressable>
-          <StackMark size={28} color="#203E2B" />
+          <StackMark size={28} color={theme.accent} />
         </View>
 
         <ScrollView
@@ -47,9 +52,9 @@ export default function SignUpScreen() {
         >
           {/* Header Copy */}
           <View style={styles.titleSection}>
-            <Text style={styles.eyebrow}>GET STARTED</Text>
-            <Text style={styles.title}>Create your Stack account</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.eyebrow, { color: theme.accent }]}>GET STARTED</Text>
+            <Text style={[styles.title, { color: theme.ink }]}>Create your Stack account</Text>
+            <Text style={[styles.subtitle, { color: theme.ink2 }]}>
               It takes about a minute. No card needed to look around.
             </Text>
           </View>
@@ -58,26 +63,36 @@ export default function SignUpScreen() {
           <View style={styles.socialGroup}>
             <Pressable
               onPress={handleSocialSignUp}
-              style={styles.appleButton}
+              style={[styles.appleButton, { backgroundColor: isDark ? '#FFFFFF' : '#000000' }]}
             >
-              <AppleLogo size={19} color="#FFFFFF" weight="fill" />
-              <Text style={styles.appleButtonText}>Sign up with Apple</Text>
+              <AppleLogo size={19} color={isDark ? '#000000' : '#FFFFFF'} weight="fill" />
+              <Text style={[styles.appleButtonText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                Sign up with Apple
+              </Text>
             </Pressable>
 
             <Pressable
               onPress={handleSocialSignUp}
-              style={styles.googleButton}
+              style={[
+                styles.googleButton,
+                {
+                  backgroundColor: theme.raised,
+                  borderColor: theme.rule,
+                },
+              ]}
             >
-              <GoogleLogo size={19} color="#EA4335" weight="bold" />
-              <Text style={styles.googleButtonText}>Sign up with Google</Text>
+              <GoogleLogo size={19} color={theme.ink} weight="bold" />
+              <Text style={[styles.googleButtonText, { color: theme.ink }]}>
+                Sign up with Google
+              </Text>
             </Pressable>
           </View>
 
           {/* Divider */}
           <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or with email</Text>
-            <View style={styles.dividerLine} />
+            <View style={[styles.dividerLine, { backgroundColor: theme.rule }]} />
+            <Text style={[styles.dividerText, { color: theme.ink3 }]}>or with email</Text>
+            <View style={[styles.dividerLine, { backgroundColor: theme.rule }]} />
           </View>
 
           {/* Input Fields */}
@@ -88,7 +103,7 @@ export default function SignUpScreen() {
               onChangeText={setName}
               placeholder="Alex Stack"
               autoCapitalize="words"
-              leadingIcon={<User size={19} color="#6B7770" />}
+              leadingIcon={<User size={19} color={theme.ink2} />}
             />
 
             <AuthField
@@ -98,7 +113,7 @@ export default function SignUpScreen() {
               placeholder="you@example.com"
               keyboardType="email-address"
               autoCapitalize="none"
-              leadingIcon={<EnvelopeSimple size={19} color="#6B7770" />}
+              leadingIcon={<EnvelopeSimple size={19} color={theme.ink2} />}
             />
 
             <AuthField
@@ -107,7 +122,7 @@ export default function SignUpScreen() {
               onChangeText={setPassword}
               placeholder="At least 8 characters"
               isPassword
-              leadingIcon={<LockSimple size={19} color="#6B7770" />}
+              leadingIcon={<LockSimple size={19} color={theme.ink2} />}
             />
 
             {/* Password strength progress bar */}
@@ -119,7 +134,7 @@ export default function SignUpScreen() {
                     styles.strengthBar,
                     {
                       backgroundColor:
-                        step <= strength ? '#204E35' : '#D6D5CE',
+                        step <= strength ? theme.accent : theme.rule,
                     },
                   ]}
                 />
@@ -131,19 +146,22 @@ export default function SignUpScreen() {
               onPress={handleSignUp}
               style={({ pressed }) => [
                 styles.primaryButton,
-                { opacity: pressed ? 0.9 : 1 },
+                {
+                  backgroundColor: theme.accent,
+                  opacity: pressed ? 0.88 : 1,
+                },
               ]}
             >
-              <Text style={styles.primaryButtonText}>Create account</Text>
+              <Text style={[styles.primaryButtonText, { color: theme.onAccent }]}>Create account</Text>
             </Pressable>
           </View>
         </ScrollView>
 
         {/* Footer Navigation */}
         <View style={styles.footerRow}>
-          <Text style={styles.footerText}>Already have an account? </Text>
+          <Text style={[styles.footerText, { color: theme.ink2 }]}>Already have an account? </Text>
           <Pressable onPress={() => router.push('/(auth)/sign-in')} hitSlop={8}>
-            <Text style={styles.footerLink}>Sign in</Text>
+            <Text style={[styles.footerLink, { color: theme.accent }]}>Sign in</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -178,21 +196,18 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#24563B',
     letterSpacing: 1.4,
     marginBottom: 8,
   },
   title: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#0E1A13',
     lineHeight: 38,
     letterSpacing: -0.5,
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 14.5,
-    color: '#4A564E',
     lineHeight: 20,
   },
   socialGroup: {
@@ -203,18 +218,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000000',
     height: 52,
     borderRadius: 26,
     gap: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
     shadowRadius: 5,
     elevation: 2,
   },
   appleButtonText: {
-    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -222,9 +235,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#D8D7D1',
     height: 52,
     borderRadius: 26,
     gap: 8,
@@ -235,7 +246,6 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   googleButtonText: {
-    color: '#0E1A13',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -247,12 +257,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#DCDAD3',
   },
   dividerText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#657169',
     marginHorizontal: 12,
     textTransform: 'lowercase',
   },
@@ -272,20 +280,18 @@ const styles = StyleSheet.create({
     borderRadius: 1.5,
   },
   primaryButton: {
-    backgroundColor: '#204E35',
     height: 54,
     borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
-    shadowColor: '#1B3E2B',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
     shadowRadius: 10,
-    elevation: 4,
+    elevation: 3,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -297,11 +303,9 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13.5,
-    color: '#556159',
   },
   footerLink: {
     fontSize: 13.5,
     fontWeight: '700',
-    color: '#204E35',
   },
 });

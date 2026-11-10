@@ -15,11 +15,13 @@ import { CardFace } from '../../components/cards/CardFace';
 import { QuickActions } from '../../components/home/QuickActions';
 import { SpendingSummary } from '../../components/home/SpendingSummary';
 import { RecentActivity } from '../../components/home/RecentActivity';
+import { getTheme } from '../../constants/theme';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -38,7 +40,7 @@ export default function HomeScreen() {
     <SafeAreaView
       style={[
         styles.safeArea,
-        isDark ? styles.canvasDark : styles.canvasLight,
+        { backgroundColor: theme.ground },
       ]}
       edges={['top']}
     >
@@ -49,14 +51,14 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={isDark ? '#4ADE80' : '#204E35'}
+            tintColor={theme.accent}
           />
         }
       >
         {/* Header: Greeting & Notifications */}
         <View style={styles.headerRow}>
-          <Text style={[styles.greetingText, isDark && styles.greetingDark]}>
-            Welcome, <Text style={styles.nameBold}>{profile.name}</Text>
+          <Text style={[styles.greetingText, { color: theme.ink2 }]}>
+            Welcome, <Text style={[styles.nameBold, { color: theme.ink }]}>{profile.name}</Text>
           </Text>
 
           <Pressable
@@ -68,11 +70,11 @@ export default function HomeScreen() {
           >
             <Bell
               size={22}
-              color={isDark ? '#F0F5F2' : '#142018'}
-              weight="regular"
+              color={theme.ink}
+              weight="bold"
             />
-            {/* Unread badge matching reference screenshot (shows 4) */}
-            <View style={styles.bellBadge}>
+            {/* Unread badge */}
+            <View style={[styles.bellBadge, { backgroundColor: theme.accent }]}>
               <Text style={styles.bellBadgeText}>4</Text>
             </View>
           </Pressable>
@@ -80,12 +82,12 @@ export default function HomeScreen() {
 
         {/* Total Unified Balance Section */}
         <View style={styles.balanceSection}>
-          <Text style={[styles.balanceLabel, isDark && styles.balanceLabelDark]}>
+          <Text style={[styles.balanceLabel, { color: theme.ink2 }]}>
             Total balance
           </Text>
           <View style={styles.amountRow}>
-            <Text style={[styles.amountHero, isDark && styles.amountHeroDark]}>
-              $25,282<Text style={styles.amountCents}>.07</Text>
+            <Text style={[styles.amountHero, { color: theme.ink }]}>
+              $25,282<Text style={[styles.amountCents, { color: theme.ink2 }]}>.07</Text>
             </Text>
           </View>
         </View>
@@ -93,7 +95,7 @@ export default function HomeScreen() {
         {/* Your cards preview row */}
         <View style={styles.cardsSection}>
           <View style={styles.cardsHeader}>
-            <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+            <Text style={[styles.sectionTitle, { color: theme.ink }]}>
               Your cards
             </Text>
             <Pressable
@@ -102,7 +104,7 @@ export default function HomeScreen() {
                 router.push('/(tabs)/cards');
               }}
             >
-              <Text style={[styles.seeAllLink, isDark && styles.seeAllLinkDark]}>
+              <Text style={[styles.seeAllLink, { color: theme.accent }]}>
                 See all
               </Text>
             </Pressable>
@@ -160,12 +162,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  canvasLight: {
-    backgroundColor: '#F4F3EF',
-  },
-  canvasDark: {
-    backgroundColor: '#0E1612',
-  },
   scrollContent: {
     paddingBottom: 110,
   },
@@ -179,30 +175,25 @@ const styles = StyleSheet.create({
   },
   greetingText: {
     fontSize: 16,
-    color: '#4B574F',
-  },
-  greetingDark: {
-    color: '#8D9E94',
+    fontWeight: '500',
   },
   nameBold: {
     fontWeight: '800',
-    color: '#0E1A13',
   },
   bellButton: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
   bellBadge: {
     position: 'absolute',
-    top: 0,
-    right: 0,
+    top: 2,
+    right: 2,
     width: 17,
     height: 17,
     borderRadius: 8.5,
-    backgroundColor: '#204E35',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -218,12 +209,8 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 13.5,
-    color: '#55635B',
     marginBottom: 4,
     fontWeight: '500',
-  },
-  balanceLabelDark: {
-    color: '#8E9F94',
   },
   amountRow: {
     flexDirection: 'row',
@@ -232,16 +219,11 @@ const styles = StyleSheet.create({
   amountHero: {
     fontSize: 40,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -1,
-  },
-  amountHeroDark: {
-    color: '#F2F7F4',
   },
   amountCents: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#34443B',
   },
   cardsSection: {
     marginBottom: 10,
@@ -256,19 +238,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.3,
-  },
-  sectionTitleDark: {
-    color: '#F2F7F4',
   },
   seeAllLink: {
     fontSize: 13.5,
     fontWeight: '700',
-    color: '#204E35',
-  },
-  seeAllLinkDark: {
-    color: '#4ADE80',
   },
   cardsScroll: {
     paddingHorizontal: 24,
@@ -282,4 +256,3 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 });
-

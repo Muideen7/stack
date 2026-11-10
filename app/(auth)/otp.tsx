@@ -4,13 +4,19 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Backspace, Info } from 'phosphor-react-native';
+import { useColorScheme } from 'nativewind';
 import * as Haptics from '@/utils/haptics';
 
 import { AuthBackdrop } from '../../components/auth/AuthBackdrop';
 import { StackMark } from '../../components/common/StackMark';
+import { getTheme } from '../../constants/theme';
 
 export default function OtpScreen() {
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
+
   const [code, setCode] = useState('');
 
   const handleDigit = (digit: string) => {
@@ -55,17 +61,17 @@ export default function OtpScreen() {
         {/* Top Header */}
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
-            <ArrowLeft size={22} color="#1A241E" />
+            <ArrowLeft size={22} color={theme.ink} />
           </Pressable>
-          <StackMark size={28} color="#203E2B" />
+          <StackMark size={28} color={theme.accent} />
         </View>
 
         {/* Content Area */}
         <View style={styles.content}>
           <View style={styles.titleSection}>
-            <Text style={styles.eyebrow}>VERIFY</Text>
-            <Text style={styles.title}>Enter your six-digit code</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.eyebrow, { color: theme.accent }]}>VERIFY</Text>
+            <Text style={[styles.title, { color: theme.ink }]}>Enter your six-digit code</Text>
+            <Text style={[styles.subtitle, { color: theme.ink2 }]}>
               Sent to demo@stack.app. It expires in ten minutes.
             </Text>
           </View>
@@ -80,11 +86,20 @@ export default function OtpScreen() {
                   key={i}
                   style={[
                     styles.codeBox,
-                    isCurrent && styles.codeBoxActive,
-                    val && styles.codeBoxFilled,
+                    {
+                      backgroundColor: val ? theme.raised : theme.raisedSubtle,
+                      borderColor: isCurrent ? theme.accent : val ? theme.rule : 'transparent',
+                    },
                   ]}
                 >
-                  <Text style={[styles.codeDigit, isCurrent && styles.codeDigitActive]}>
+                  <Text
+                    style={[
+                      styles.codeDigit,
+                      {
+                        color: isCurrent ? theme.accent : val ? theme.ink : theme.ink3,
+                      },
+                    ]}
+                  >
                     {val || '-'}
                   </Text>
                 </View>
@@ -97,14 +112,18 @@ export default function OtpScreen() {
             onPress={handleFillDemoCode}
             style={({ pressed }) => [
               styles.demoPill,
-              { opacity: pressed ? 0.85 : 1 },
+              {
+                backgroundColor: theme.accentSoft,
+                borderColor: theme.rule,
+                opacity: pressed ? 0.85 : 1,
+              },
             ]}
           >
-            <Info size={15} color="#1E4331" weight="bold" />
-            <Text style={styles.demoPillText}>Demo code: 284917</Text>
+            <Info size={15} color={theme.accent} weight="bold" />
+            <Text style={[styles.demoPillText, { color: theme.ink }]}>Demo code: 284917</Text>
           </Pressable>
 
-          <Text style={styles.resendText}>Resend in 27s</Text>
+          <Text style={[styles.resendText, { color: theme.ink2 }]}>Resend in 27s</Text>
 
           {/* Verify Button */}
           <Pressable
@@ -112,13 +131,18 @@ export default function OtpScreen() {
             disabled={code.length < 6}
             style={[
               styles.verifyButton,
-              code.length === 6 ? styles.verifyButtonActive : styles.verifyButtonDisabled,
+              {
+                backgroundColor: code.length === 6 ? theme.accent : theme.raisedSubtle,
+                borderColor: theme.rule,
+              },
             ]}
           >
             <Text
               style={[
                 styles.verifyButtonText,
-                code.length === 6 ? styles.verifyButtonTextActive : styles.verifyButtonTextDisabled,
+                {
+                  color: code.length === 6 ? theme.onAccent : theme.ink3,
+                },
               ]}
             >
               Verify
@@ -126,7 +150,7 @@ export default function OtpScreen() {
           </Pressable>
         </View>
 
-        {/* Custom iOS-styled numeric keypad */}
+        {/* Custom numeric keypad */}
         <View style={styles.keypadContainer}>
           {[
             ['1', '2', '3'],
@@ -146,10 +170,14 @@ export default function OtpScreen() {
                       onPress={handleBackspace}
                       style={({ pressed }) => [
                         styles.keyButton,
-                        { opacity: pressed ? 0.6 : 1 },
+                        {
+                          backgroundColor: theme.raised,
+                          borderColor: theme.rule,
+                          opacity: pressed ? 0.6 : 1,
+                        },
                       ]}
                     >
-                      <Backspace size={24} color="#1A241E" />
+                      <Backspace size={24} color={theme.ink} weight="bold" />
                     </Pressable>
                   );
                 }
@@ -159,10 +187,14 @@ export default function OtpScreen() {
                     onPress={() => handleDigit(k)}
                     style={({ pressed }) => [
                       styles.keyButton,
-                      { opacity: pressed ? 0.7 : 1 },
+                      {
+                        backgroundColor: theme.raised,
+                        borderColor: theme.rule,
+                        opacity: pressed ? 0.7 : 1,
+                      },
                     ]}
                   >
-                    <Text style={styles.keyDigit}>{k}</Text>
+                    <Text style={[styles.keyDigit, { color: theme.ink }]}>{k}</Text>
                   </Pressable>
                 );
               })}
@@ -202,21 +234,18 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#24563B',
     letterSpacing: 1.4,
     marginBottom: 8,
   },
   title: {
     fontSize: 31,
     fontWeight: '800',
-    color: '#0E1A13',
     lineHeight: 36,
     letterSpacing: -0.5,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14.5,
-    color: '#4A564E',
     lineHeight: 20,
   },
   codeRow: {
@@ -228,35 +257,19 @@ const styles = StyleSheet.create({
     width: 48,
     height: 58,
     borderRadius: 14,
-    backgroundColor: '#EBEAE4',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: 'transparent',
-  },
-  codeBoxActive: {
-    borderColor: '#204E35',
-    backgroundColor: '#F5F5F0',
-  },
-  codeBoxFilled: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D8D7D1',
   },
   codeDigit: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#9EABA2',
-  },
-  codeDigitActive: {
-    color: '#204E35',
   },
   demoPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#E2EDE6',
     borderWidth: 1,
-    borderColor: '#C8D9CE',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -266,11 +279,9 @@ const styles = StyleSheet.create({
   demoPillText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1E4331',
   },
   resendText: {
     fontSize: 13,
-    color: '#556159',
     marginTop: 6,
     marginBottom: 20,
   },
@@ -280,27 +291,11 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  verifyButtonActive: {
-    backgroundColor: '#204E35',
-    shadowColor: '#1B3E2B',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  verifyButtonDisabled: {
-    backgroundColor: '#D9D8D2',
+    borderWidth: 1,
   },
   verifyButtonText: {
     fontSize: 16,
     fontWeight: '700',
-  },
-  verifyButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  verifyButtonTextDisabled: {
-    color: '#7D8880',
   },
   keypadContainer: {
     paddingBottom: 10,
@@ -313,24 +308,23 @@ const styles = StyleSheet.create({
   },
   keyButton: {
     flex: 1,
-    height: 48,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    height: 50,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.04,
     shadowRadius: 2,
     elevation: 1,
   },
   keyEmpty: {
     flex: 1,
-    height: 48,
+    height: 50,
   },
   keyDigit: {
     fontSize: 22,
-    fontWeight: '600',
-    color: '#0E1A13',
+    fontWeight: '700',
   },
 });

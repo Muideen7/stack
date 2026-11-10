@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, TextInputProps } from 'react-native';
 import { Eye, EyeSlash } from 'phosphor-react-native';
+import { useColorScheme } from 'nativewind';
+import { getTheme } from '../../constants/theme';
 
 interface AuthFieldProps extends TextInputProps {
   label: string;
@@ -17,22 +19,34 @@ export const AuthField: React.FC<AuthFieldProps> = ({
   trailingRightAction,
   ...inputProps
 }) => {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
+
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <View style={styles.group}>
       <View style={styles.labelRow}>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, { color: theme.ink }]}>{label}</Text>
         {trailingRightAction}
       </View>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            backgroundColor: theme.raised,
+            borderColor: theme.rule,
+          },
+        ]}
+      >
         {leadingIcon && <View style={styles.leadingIcon}>{leadingIcon}</View>}
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: theme.ink }]}
           secureTextEntry={isPassword && !showPassword}
-          placeholderTextColor="#9AA39D"
+          placeholderTextColor={theme.ink3}
           {...inputProps}
         />
 
@@ -43,9 +57,9 @@ export const AuthField: React.FC<AuthFieldProps> = ({
             style={styles.eyeButton}
           >
             {showPassword ? (
-              <EyeSlash size={19} color="#6B7770" />
+              <EyeSlash size={19} color={theme.ink2} />
             ) : (
-              <Eye size={19} color="#6B7770" />
+              <Eye size={19} color={theme.ink2} />
             )}
           </Pressable>
         )}
@@ -67,21 +81,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#1A241E',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#D8D7D1',
-    borderRadius: 14,
-    paddingHorizontal: 14,
+    borderRadius: 16,
+    paddingHorizontal: 16,
     height: 52,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     elevation: 1,
   },
   leadingIcon: {
@@ -92,7 +103,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
-    color: '#0E1A13',
     height: '100%',
   },
   eyeButton: {

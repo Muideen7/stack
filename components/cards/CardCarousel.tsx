@@ -12,6 +12,7 @@ import { useColorScheme } from 'nativewind';
 import * as Haptics from '@/utils/haptics';
 import { PaymentCard } from '../../types/models';
 import { CardFace } from './CardFace';
+import { getTheme } from '../../constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.84;
@@ -32,6 +33,7 @@ export const CardCarousel: React.FC<CardCarouselProps> = ({
 }) => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
   const scrollX = useSharedValue(0);
 
   const onScroll = useAnimatedScrollHandler({
@@ -103,7 +105,7 @@ export const CardCarousel: React.FC<CardCarouselProps> = ({
         })}
       </Animated.ScrollView>
 
-      {/* Pagination dots matching reference */}
+      {/* Pagination indicators */}
       <View style={styles.dotsRow}>
         {cards.map((_, i) => {
           const isActive = i === activeIndex;
@@ -112,9 +114,11 @@ export const CardCarousel: React.FC<CardCarouselProps> = ({
               key={i}
               style={[
                 styles.dot,
-                isActive ? styles.dotActive : styles.dotInactive,
-                isActive && isDark && styles.dotActiveDark,
-                !isActive && isDark && styles.dotInactiveDark,
+                {
+                  width: isActive ? 20 : 6,
+                  backgroundColor: isActive ? theme.accent : theme.ink3,
+                  opacity: isActive ? 1 : 0.4,
+                },
               ]}
             />
           );
@@ -140,19 +144,4 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
   },
-  dotActive: {
-    width: 20,
-    backgroundColor: '#204E35',
-  },
-  dotActiveDark: {
-    backgroundColor: '#4ADE80',
-  },
-  dotInactive: {
-    width: 6,
-    backgroundColor: '#D2D0C7',
-  },
-  dotInactiveDark: {
-    backgroundColor: '#384A3F',
-  },
 });
-

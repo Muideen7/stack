@@ -2,6 +2,8 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Info } from 'phosphor-react-native';
+import { useColorScheme } from 'nativewind';
+import { getTheme } from '../../constants/theme';
 
 interface AuthBannerProps {
   message: string;
@@ -9,10 +11,22 @@ interface AuthBannerProps {
 }
 
 export const AuthBanner: React.FC<AuthBannerProps> = ({ message, onPress }) => {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
+
   const content = (
-    <View style={styles.banner}>
-      <Info size={16} color="#1E4331" weight="bold" />
-      <Text style={styles.text}>{message}</Text>
+    <View
+      style={[
+        styles.banner,
+        {
+          backgroundColor: theme.accentSoft,
+          borderColor: theme.rule,
+        },
+      ]}
+    >
+      <Info size={16} color={theme.accent} weight="bold" />
+      <Text style={[styles.text, { color: theme.ink }]}>{message}</Text>
     </View>
   );
 
@@ -31,9 +45,7 @@ const styles = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E2EDE6',
     borderWidth: 1,
-    borderColor: '#C8D9CE',
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 11,
@@ -43,7 +55,6 @@ const styles = StyleSheet.create({
   text: {
     flex: 1,
     fontSize: 13,
-    color: '#1E4331',
     lineHeight: 18,
     fontWeight: '500',
   },

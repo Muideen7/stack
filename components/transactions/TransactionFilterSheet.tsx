@@ -6,15 +6,16 @@ import { Funnel, CaretUpDown } from 'phosphor-react-native';
 import { useColorScheme } from 'nativewind';
 import * as Haptics from '@/utils/haptics';
 import { SpendCategory } from '../../types/models';
+import { getTheme } from '../../constants/theme';
 
 interface FilterSheetProps {
   visible: boolean;
   onClose: () => void;
-  selectedCard: string; // 'all' or cardId
+  selectedCard: string;
   onChangeCard: (card: string) => void;
   selectedCategory: SpendCategory | 'All';
   onChangeCategory: (cat: SpendCategory | 'All') => void;
-  selectedDateRange: string; // 'all', 'week', 'month'
+  selectedDateRange: string;
   onChangeDateRange: (range: string) => void;
   onApply: () => void;
   onClear: () => void;
@@ -56,6 +57,7 @@ export const TransactionFilterSheet: React.FC<FilterSheetProps> = ({
 }) => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   if (!visible) return null;
 
@@ -90,81 +92,89 @@ export const TransactionFilterSheet: React.FC<FilterSheetProps> = ({
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.modalRoot}>
-        {/* Scrim backdrop */}
         <Pressable style={styles.scrimBackdrop} onPress={onClose} />
 
-        {/* Bottom Sheet */}
         <SafeAreaView
           edges={['bottom']}
           style={[
             styles.sheetContainer,
-            isDark ? styles.sheetDark : styles.sheetLight,
+            {
+              backgroundColor: theme.raised,
+            },
           ]}
         >
-          {/* Handle */}
-          <View style={[styles.dragHandle, isDark && styles.dragHandleDark]} />
+          {/* Drag Handle */}
+          <View style={[styles.dragHandle, { backgroundColor: theme.rule }]} />
 
-          {/* Badge */}
-          <View style={[styles.iconBadge, isDark && styles.iconBadgeDark]}>
+          {/* Icon Badge */}
+          <View style={[styles.iconBadge, { backgroundColor: theme.accentSoft }]}>
             <Funnel
               size={20}
-              color={isDark ? '#4ADE80' : '#204E35'}
+              color={theme.accent}
               weight="bold"
             />
           </View>
 
           {/* Title */}
-          <Text style={[styles.sheetTitle, isDark && styles.sheetTitleDark]}>
+          <Text style={[styles.sheetTitle, { color: theme.ink }]}>
             Filter
           </Text>
 
           {/* Subtitle */}
-          <Text style={[styles.sheetSubtitle, isDark && styles.sheetSubtitleDark]}>
+          <Text style={[styles.sheetSubtitle, { color: theme.ink2 }]}>
             Narrowing the list does not change the week on the home chart, which always shows everything.
           </Text>
 
           {/* Options Card */}
-          <View style={[styles.optionsCard, isDark ? styles.optionsCardDark : styles.optionsCardLight]}>
+          <View
+            style={[
+              styles.optionsCard,
+              {
+                backgroundColor: theme.raisedSubtle,
+                borderColor: theme.rule,
+              },
+            ]}
+          >
             {/* Card row */}
             <Pressable onPress={cycleCard} style={styles.optionRow}>
-              <Text style={[styles.optionLabel, isDark && styles.optionLabelDark]}>
+              <Text style={[styles.optionLabel, { color: theme.ink }]}>
                 Card
               </Text>
               <View style={styles.rowRight}>
-                <Text style={[styles.optionValue, isDark && styles.optionValueDark]} numberOfLines={1}>
+                <Text style={[styles.optionValue, { color: theme.ink2 }]} numberOfLines={1}>
                   {currentCardLabel}
                 </Text>
-                <CaretUpDown size={16} color={isDark ? '#8A9C91' : '#5C6A61'} />
+                <CaretUpDown size={16} color={theme.ink2} />
               </View>
             </Pressable>
 
-            <View style={[styles.divider, isDark && styles.dividerDark]} />
+            <View style={[styles.divider, { backgroundColor: theme.rule }]} />
 
             {/* Category row */}
             <Pressable onPress={cycleCategory} style={styles.optionRow}>
-              <Text style={[styles.optionLabel, isDark && styles.optionLabelDark]}>
+              <Text style={[styles.optionLabel, { color: theme.ink }]}>
                 Category
               </Text>
               <View style={styles.rowRight}>
-                <Text style={[styles.optionValue, isDark && styles.optionValueDark]}>
+                <Text style={[styles.optionValue, { color: theme.ink2 }]}>
                   {currentCategoryLabel}
                 </Text>
-                <CaretUpDown size={16} color={isDark ? '#8A9C91' : '#5C6A61'} />
+                <CaretUpDown size={16} color={theme.ink2} />
               </View>
             </Pressable>
 
-            <View style={[styles.divider, isDark && styles.dividerDark]} />
+            <View style={[styles.divider, { backgroundColor: theme.rule }]} />
 
-            {/* Dates row */}
+            {/* Date range row */}
             <Pressable onPress={cycleDateRange} style={styles.optionRow}>
-              <Text style={[styles.optionLabel, isDark && styles.optionLabelDark]}>
+              <Text style={[styles.optionLabel, { color: theme.ink }]}>
                 Dates
               </Text>
               <View style={styles.rowRight}>
-                <Text style={[styles.optionValue, isDark && styles.optionValueDark]}>
+                <Text style={[styles.optionValue, { color: theme.ink2 }]}>
                   {currentDateLabel}
                 </Text>
-                <CaretUpDown size={16} color={isDark ? '#8A9C91' : '#5C6A61'} />
+                <CaretUpDown size={16} color={theme.ink2} />
               </View>
             </Pressable>
           </View>
@@ -178,11 +188,13 @@ export const TransactionFilterSheet: React.FC<FilterSheetProps> = ({
               }}
               style={({ pressed }) => [
                 styles.primaryBtn,
-                isDark ? styles.primaryBtnDark : styles.primaryBtnLight,
-                { opacity: pressed ? 0.9 : 1 },
+                {
+                  backgroundColor: theme.accent,
+                  opacity: pressed ? 0.88 : 1,
+                },
               ]}
             >
-              <Text style={styles.primaryBtnText}>Show these</Text>
+              <Text style={[styles.primaryBtnText, { color: theme.onAccent }]}>Show these</Text>
             </Pressable>
 
             <Pressable
@@ -192,11 +204,14 @@ export const TransactionFilterSheet: React.FC<FilterSheetProps> = ({
               }}
               style={({ pressed }) => [
                 styles.secondaryBtn,
-                isDark ? styles.secondaryBtnDark : styles.secondaryBtnLight,
-                { opacity: pressed ? 0.8 : 1 },
+                {
+                  backgroundColor: theme.raised,
+                  borderColor: theme.rule,
+                  opacity: pressed ? 0.8 : 1,
+                },
               ]}
             >
-              <Text style={[styles.secondaryBtnText, isDark && styles.secondaryBtnTextDark]}>
+              <Text style={[styles.secondaryBtnText, { color: theme.ink }]}>
                 Clear all
               </Text>
             </Pressable>
@@ -228,67 +243,37 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 16,
   },
-  sheetLight: {
-    backgroundColor: '#FFFFFF',
-  },
-  sheetDark: {
-    backgroundColor: '#16201B',
-  },
   dragHandle: {
     width: 44,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#DCDAD3',
     alignSelf: 'center',
     marginBottom: 16,
-  },
-  dragHandleDark: {
-    backgroundColor: '#35463C',
   },
   iconBadge: {
     width: 42,
     height: 42,
-    borderRadius: 12,
-    backgroundColor: '#E2EDE6',
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
-  iconBadgeDark: {
-    backgroundColor: '#1E3527',
-  },
   sheetTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.3,
     marginBottom: 6,
   },
-  sheetTitleDark: {
-    color: '#F2F7F4',
-  },
   sheetSubtitle: {
     fontSize: 13.5,
-    color: '#5C6A61',
     lineHeight: 18,
     marginBottom: 20,
-  },
-  sheetSubtitleDark: {
-    color: '#8A9C91',
   },
   optionsCard: {
     borderRadius: 20,
     paddingHorizontal: 16,
     borderWidth: 1,
     marginBottom: 20,
-  },
-  optionsCardLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#ECEAE4',
-  },
-  optionsCardDark: {
-    backgroundColor: '#202B24',
-    borderColor: '#2D3C33',
   },
   optionRow: {
     flexDirection: 'row',
@@ -304,26 +289,14 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontSize: 14.5,
-    color: '#0E1A13',
     fontWeight: '600',
-  },
-  optionLabelDark: {
-    color: '#F2F7F4',
   },
   optionValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#5C6A61',
-  },
-  optionValueDark: {
-    color: '#8A9C91',
   },
   divider: {
     height: 1,
-    backgroundColor: '#ECEAE4',
-  },
-  dividerDark: {
-    backgroundColor: '#2D3C33',
   },
   buttonStack: {
     gap: 12,
@@ -334,16 +307,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  primaryBtnLight: {
-    backgroundColor: '#204E35',
-  },
-  primaryBtnDark: {
-    backgroundColor: '#225B3C',
-  },
   primaryBtnText: {
     fontSize: 15.5,
     fontWeight: '700',
-    color: '#FFFFFF',
   },
   secondaryBtn: {
     height: 52,
@@ -352,20 +318,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
   },
-  secondaryBtnLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D8D7D1',
-  },
-  secondaryBtnDark: {
-    backgroundColor: '#202B24',
-    borderColor: '#35463C',
-  },
   secondaryBtnText: {
     fontSize: 15.5,
     fontWeight: '700',
-    color: '#0E1A13',
-  },
-  secondaryBtnTextDark: {
-    color: '#F2F7F4',
   },
 });

@@ -4,30 +4,23 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useColorScheme } from 'nativewind';
 import { SpendSummary } from '../../utils/spendRollup';
 import { Money } from '../../utils/money';
+import { getTheme, PALETTE } from '../../constants/theme';
 
 interface SpendingSummaryProps {
   summary: SpendSummary;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Groceries: '#1A3B29',
-  Transfers: '#275A3E',
-  Food: '#368057',
-  Transport: '#52A574',
-  Other: '#8AC7A4',
-};
-
 export const SpendingSummary: React.FC<SpendingSummaryProps> = ({ summary }) => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
-  // Standard 5 categories matching reference
   const categoriesList = [
-    { name: 'Groceries', amount: 10532, color: '#1A3B29' },
-    { name: 'Transfers', amount: 7500, color: '#275A3E' },
-    { name: 'Food', amount: 3655, color: '#368057' },
-    { name: 'Transport', amount: 3424, color: '#52A574' },
-    { name: 'Other', amount: 3539, color: '#8AC7A4' },
+    { name: 'Groceries', amount: 10532, color: PALETTE.spending.groceries },
+    { name: 'Transfers', amount: 7500, color: PALETTE.spending.transfers },
+    { name: 'Food', amount: 3655, color: PALETTE.spending.food },
+    { name: 'Transport', amount: 3424, color: PALETTE.spending.transport },
+    { name: 'Other', amount: 3539, color: PALETTE.spending.other },
   ];
 
   const totalMinor = 28650; // $286.50 matching reference
@@ -39,15 +32,18 @@ export const SpendingSummary: React.FC<SpendingSummaryProps> = ({ summary }) => 
     <View
       style={[
         styles.cardContainer,
-        isDark ? styles.cardDark : styles.cardLight,
+        {
+          backgroundColor: theme.raised,
+          borderColor: theme.rule,
+        },
       ]}
     >
       {/* Header */}
       <View style={styles.headerRow}>
-        <Text style={[styles.title, isDark && styles.titleDark]}>
+        <Text style={[styles.title, { color: theme.ink }]}>
           Spent this week
         </Text>
-        <Text style={[styles.totalAmount, isDark && styles.totalAmountDark]}>
+        <Text style={[styles.totalAmount, { color: theme.ink }]}>
           {Money.format(totalMinor, 'USD')}
         </Text>
       </View>
@@ -82,9 +78,9 @@ export const SpendingSummary: React.FC<SpendingSummaryProps> = ({ summary }) => 
           {col1.map((item) => (
             <View key={item.name} style={styles.legendItem}>
               <View style={[styles.dot, { backgroundColor: item.color }]} />
-              <Text style={[styles.legendLabel, isDark && styles.legendLabelDark]}>
+              <Text style={[styles.legendLabel, { color: theme.ink2 }]}>
                 {item.name}{' '}
-                <Text style={[styles.legendValue, isDark && styles.legendValueDark]}>
+                <Text style={[styles.legendValue, { color: theme.ink }]}>
                   {Money.format(item.amount, 'USD')}
                 </Text>
               </Text>
@@ -96,9 +92,9 @@ export const SpendingSummary: React.FC<SpendingSummaryProps> = ({ summary }) => 
           {col2.map((item) => (
             <View key={item.name} style={styles.legendItem}>
               <View style={[styles.dot, { backgroundColor: item.color }]} />
-              <Text style={[styles.legendLabel, isDark && styles.legendLabelDark]}>
+              <Text style={[styles.legendLabel, { color: theme.ink2 }]}>
                 {item.name}{' '}
-                <Text style={[styles.legendValue, isDark && styles.legendValueDark]}>
+                <Text style={[styles.legendValue, { color: theme.ink }]}>
                   {Money.format(item.amount, 'USD')}
                 </Text>
               </Text>
@@ -112,22 +108,14 @@ export const SpendingSummary: React.FC<SpendingSummaryProps> = ({ summary }) => 
 
 const styles = StyleSheet.create({
   cardContainer: {
-    borderRadius: 24,
+    borderRadius: 22,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
-    shadowRadius: 12,
+    shadowRadius: 14,
     elevation: 2,
     borderWidth: 1,
-  },
-  cardLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#ECEAE4',
-  },
-  cardDark: {
-    backgroundColor: '#16201B',
-    borderColor: '#26342B',
   },
   headerRow: {
     flexDirection: 'row',
@@ -138,19 +126,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.2,
-  },
-  titleDark: {
-    color: '#F2F7F4',
   },
   totalAmount: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#0E1A13',
-  },
-  totalAmountDark: {
-    color: '#F2F7F4',
   },
   barRow: {
     height: 10,
@@ -174,25 +154,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dot: {
-    width: 6.5,
-    height: 6.5,
+    width: 7,
+    height: 7,
     borderRadius: 3.5,
     marginRight: 8,
   },
   legendLabel: {
     fontSize: 13,
-    color: '#4C5850',
     fontWeight: '500',
-  },
-  legendLabelDark: {
-    color: '#8A9B91',
   },
   legendValue: {
     fontWeight: '700',
-    color: '#0E1A13',
-  },
-  legendValueDark: {
-    color: '#F2F7F4',
   },
 });
-

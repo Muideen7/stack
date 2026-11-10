@@ -11,11 +11,13 @@ import { useWalletStore } from '../../store/walletStore';
 import { CardCarousel } from '../../components/cards/CardCarousel';
 import { WalletStack } from '../../components/cards/WalletStack';
 import { Money } from '../../utils/money';
+import { getTheme } from '../../constants/theme';
 
 export default function CardsScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const [layoutMode, setLayoutMode] = useState<'carousel' | 'wallet'>('wallet');
 
@@ -34,7 +36,7 @@ export default function CardsScreen() {
     <SafeAreaView
       style={[
         styles.safeArea,
-        isDark ? styles.canvasDark : styles.canvasLight,
+        { backgroundColor: theme.ground },
       ]}
       edges={['top']}
     >
@@ -44,7 +46,7 @@ export default function CardsScreen() {
       >
         {/* Header: Title + Add & More buttons */}
         <View style={styles.headerRow}>
-          <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
+          <Text style={[styles.headerTitle, { color: theme.ink }]}>
             Cards
           </Text>
 
@@ -58,7 +60,7 @@ export default function CardsScreen() {
             >
               <Plus
                 size={22}
-                color={isDark ? '#F0F5F2' : '#0E1A13'}
+                color={theme.ink}
                 weight="bold"
               />
             </Pressable>
@@ -72,7 +74,7 @@ export default function CardsScreen() {
             >
               <DotsThree
                 size={24}
-                color={isDark ? '#F0F5F2' : '#0E1A13'}
+                color={theme.ink}
                 weight="bold"
               />
             </Pressable>
@@ -84,7 +86,10 @@ export default function CardsScreen() {
           <View
             style={[
               styles.segmentedContainer,
-              isDark ? styles.segmentedDark : styles.segmentedLight,
+              {
+                backgroundColor: theme.raisedSubtle,
+                borderColor: theme.rule,
+              },
             ]}
           >
             {/* Carousel Option */}
@@ -95,24 +100,21 @@ export default function CardsScreen() {
               }}
               style={[
                 styles.segmentItem,
-                layoutMode === 'carousel' && (isDark ? styles.segmentActiveDark : styles.segmentActiveLight),
+                layoutMode === 'carousel' && [
+                  styles.segmentActive,
+                  { backgroundColor: theme.raised, borderColor: theme.rule },
+                ],
               ]}
             >
               <Cards
                 size={18}
-                color={
-                  layoutMode === 'carousel'
-                    ? (isDark ? '#4ADE80' : '#0E1A13')
-                    : (isDark ? '#8A9B91' : '#5C6A61')
-                }
+                color={layoutMode === 'carousel' ? theme.accent : theme.ink2}
                 weight={layoutMode === 'carousel' ? 'bold' : 'regular'}
               />
               <Text
                 style={[
                   styles.segmentText,
-                  layoutMode === 'carousel'
-                    ? (isDark ? styles.segmentTextActiveDark : styles.segmentTextActiveLight)
-                    : (isDark ? styles.segmentTextInactiveDark : styles.segmentTextInactiveLight),
+                  { color: layoutMode === 'carousel' ? theme.ink : theme.ink2 },
                 ]}
               >
                 Carousel
@@ -127,24 +129,21 @@ export default function CardsScreen() {
               }}
               style={[
                 styles.segmentItem,
-                layoutMode === 'wallet' && (isDark ? styles.segmentActiveDark : styles.segmentActiveLight),
+                layoutMode === 'wallet' && [
+                  styles.segmentActive,
+                  { backgroundColor: theme.raised, borderColor: theme.rule },
+                ],
               ]}
             >
               <Wallet
                 size={18}
-                color={
-                  layoutMode === 'wallet'
-                    ? (isDark ? '#4ADE80' : '#0E1A13')
-                    : (isDark ? '#8A9B91' : '#5C6A61')
-                }
+                color={layoutMode === 'wallet' ? theme.accent : theme.ink2}
                 weight={layoutMode === 'wallet' ? 'bold' : 'regular'}
               />
               <Text
                 style={[
                   styles.segmentText,
-                  layoutMode === 'wallet'
-                    ? (isDark ? styles.segmentTextActiveDark : styles.segmentTextActiveLight)
-                    : (isDark ? styles.segmentTextInactiveDark : styles.segmentTextInactiveLight),
+                  { color: layoutMode === 'wallet' ? theme.ink : theme.ink2 },
                 ]}
               >
                 Wallet
@@ -153,7 +152,7 @@ export default function CardsScreen() {
           </View>
         </View>
 
-        {/* Main Content Area */}
+        {/* Display depending on segmented toggle */}
         {layoutMode === 'wallet' ? (
           <View style={styles.walletContainer}>
             <WalletStack
@@ -168,132 +167,101 @@ export default function CardsScreen() {
           </View>
         ) : (
           <View style={styles.carouselContainer}>
-            {/* Interactive Carousel */}
             <CardCarousel
               cards={cards}
               activeIndex={activeCardIndex}
               onFocusChange={setActiveCardIndex}
             />
 
-            {/* Selected Card Balance */}
+            {/* Dedicated Card Balance */}
             {currentCard && (
               <View style={styles.cardBalanceSection}>
-                <Text
-                  style={[
-                    styles.cardBalanceAmount,
-                    isDark && styles.cardBalanceAmountDark,
-                  ]}
-                >
+                <Text style={[styles.cardBalanceAmount, { color: theme.ink }]}>
                   {Money.format(currentCard.balanceMinor, currentCard.currency)}
                 </Text>
-                <Text
-                  style={[
-                    styles.cardBalanceSubtitle,
-                    isDark && styles.cardBalanceSubtitleDark,
-                  ]}
-                >
-                  {currentCard.funding === 'credit' ? 'Credit' : 'Debit'} · •••• {currentCard.last4}
+                <Text style={[styles.cardBalanceSubtitle, { color: theme.ink2 }]}>
+                  {currentCard.nickname} · {currentCard.brand.toUpperCase()}
                 </Text>
               </View>
             )}
 
-            {/* Card Info Section */}
+            {/* Card Information Sheet Block */}
             {currentCard && (
               <View style={styles.infoWrapper}>
-                <Text style={[styles.infoSectionTitle, isDark && styles.infoSectionTitleDark]}>
-                  Card info
+                <Text style={[styles.infoSectionTitle, { color: theme.ink }]}>
+                  Card details
                 </Text>
 
                 <View
                   style={[
                     styles.infoCard,
-                    isDark ? styles.infoCardDark : styles.infoCardLight,
+                    {
+                      backgroundColor: theme.raised,
+                      borderColor: theme.rule,
+                    },
                   ]}
                 >
-                  {/* Row 1: Card number with copy button */}
+                  {/* Card Number Row */}
                   <View style={styles.infoRow}>
                     <View>
-                      <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
-                        Card number
-                      </Text>
-                      <Text style={[styles.infoValue, isDark && styles.infoValueDark]}>
+                      <Text style={[styles.infoLabel, { color: theme.ink2 }]}>Card number</Text>
+                      <Text style={[styles.infoValue, { color: theme.ink }]}>
                         •••• •••• •••• {currentCard.last4}
                       </Text>
                     </View>
                     <Pressable onPress={handleCopyNumber} style={styles.copyButton}>
-                      <CopySimple
-                        size={18}
-                        color={isDark ? '#8A9C91' : '#5C6A61'}
-                        weight="regular"
-                      />
+                      <CopySimple size={20} color={theme.accent} weight="bold" />
                     </Pressable>
                   </View>
 
-                  <View style={[styles.divider, isDark && styles.dividerDark]} />
+                  <View style={[styles.divider, { backgroundColor: theme.rule }]} />
 
-                  {/* Row 2: Expires & Network */}
+                  {/* Expiry & CVV Row */}
                   <View style={styles.twoColRow}>
                     <View style={styles.col}>
-                      <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
-                        Expires
-                      </Text>
-                      <Text style={[styles.infoValue, isDark && styles.infoValueDark]}>
-                        {expiry}
-                      </Text>
+                      <Text style={[styles.infoLabel, { color: theme.ink2 }]}>Expires</Text>
+                      <Text style={[styles.infoValue, { color: theme.ink }]}>{expiry}</Text>
                     </View>
                     <View style={styles.col}>
-                      <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
-                        Network
-                      </Text>
-                      <Text
-                        style={[
-                          styles.infoValue,
-                          styles.capitalize,
-                          isDark && styles.infoValueDark,
-                        ]}
-                      >
-                        {currentCard.brand === 'mastercard' ? 'Mastercard' : 'Visa'}
+                      <Text style={[styles.infoLabel, { color: theme.ink2 }]}>CVV</Text>
+                      <Text style={[styles.infoValue, { color: theme.ink }]}>•••</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.divider, { backgroundColor: theme.rule }]} />
+
+                  {/* Cardholder & Type Row */}
+                  <View style={styles.twoColRow}>
+                    <View style={styles.col}>
+                      <Text style={[styles.infoLabel, { color: theme.ink2 }]}>Cardholder</Text>
+                      <Text style={[styles.infoValue, { color: theme.ink }]}>{currentCard.holder}</Text>
+                    </View>
+                    <View style={styles.col}>
+                      <Text style={[styles.infoLabel, { color: theme.ink2 }]}>Type</Text>
+                      <Text style={[styles.infoValue, styles.capitalize, { color: theme.ink }]}>
+                        {currentCard.funding}
                       </Text>
                     </View>
                   </View>
 
-                  <View style={[styles.divider, isDark && styles.dividerDark]} />
+                  <View style={[styles.divider, { backgroundColor: theme.rule }]} />
 
-                  {/* Row 3: Cardholder */}
-                  <View style={styles.infoRow}>
-                    <View>
-                      <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
-                        Cardholder
-                      </Text>
+                  {/* Status & Spend Limit */}
+                  <View style={styles.twoColRow}>
+                    <View style={styles.col}>
+                      <Text style={[styles.infoLabel, { color: theme.ink2 }]}>Status</Text>
                       <Text
                         style={[
                           styles.infoValue,
-                          styles.uppercase,
-                          isDark && styles.infoValueDark,
+                          { color: currentCard.frozen ? theme.negative : theme.positive },
                         ]}
                       >
-                        {currentCard.holder}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={[styles.divider, isDark && styles.dividerDark]} />
-
-                  {/* Row 4: Status & Monthly limit */}
-                  <View style={styles.twoColRow}>
-                    <View style={styles.col}>
-                      <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
-                        Status
-                      </Text>
-                      <Text style={[styles.infoValue, isDark && styles.infoValueDark]}>
                         {currentCard.frozen ? 'Frozen' : 'Active'}
                       </Text>
                     </View>
                     <View style={styles.col}>
-                      <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
-                        Monthly limit
-                      </Text>
-                      <Text style={[styles.infoValue, isDark && styles.infoValueDark]}>
+                      <Text style={[styles.infoLabel, { color: theme.ink2 }]}>Monthly limit</Text>
+                      <Text style={[styles.infoValue, { color: theme.ink }]}>
                         {currentCard.spendLimitMinor
                           ? Money.format(currentCard.spendLimitMinor, currentCard.currency)
                           : 'None'}
@@ -314,12 +282,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  canvasLight: {
-    backgroundColor: '#F4F3EF',
-  },
-  canvasDark: {
-    backgroundColor: '#0E1612',
-  },
   scrollContent: {
     paddingBottom: 110,
   },
@@ -334,11 +296,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.5,
-  },
-  headerTitleDark: {
-    color: '#F2F7F4',
   },
   headerActions: {
     flexDirection: 'row',
@@ -346,8 +304,8 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   iconButton: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -359,12 +317,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 24,
     padding: 4,
-  },
-  segmentedLight: {
-    backgroundColor: '#EBE9E2',
-  },
-  segmentedDark: {
-    backgroundColor: '#1E2822',
+    borderWidth: 1,
   },
   segmentItem: {
     flex: 1,
@@ -375,37 +328,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 8,
   },
-  segmentActiveLight: {
-    backgroundColor: '#FFFFFF',
+  segmentActive: {
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
-  segmentActiveDark: {
-    backgroundColor: '#26362D',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
-  },
   segmentText: {
     fontSize: 14,
     fontWeight: '700',
-  },
-  segmentTextActiveLight: {
-    color: '#0E1A13',
-  },
-  segmentTextActiveDark: {
-    color: '#F2F7F4',
-  },
-  segmentTextInactiveLight: {
-    color: '#5C6A61',
-  },
-  segmentTextInactiveDark: {
-    color: '#8A9C91',
   },
   walletContainer: {
     paddingHorizontal: 24,
@@ -421,20 +354,12 @@ const styles = StyleSheet.create({
   cardBalanceAmount: {
     fontSize: 34,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.6,
-  },
-  cardBalanceAmountDark: {
-    color: '#F2F7F4',
   },
   cardBalanceSubtitle: {
     fontSize: 13.5,
-    color: '#5C6A61',
     fontWeight: '500',
     marginTop: 4,
-  },
-  cardBalanceSubtitleDark: {
-    color: '#8A9C91',
   },
   infoWrapper: {
     paddingHorizontal: 24,
@@ -442,32 +367,19 @@ const styles = StyleSheet.create({
   infoSectionTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.2,
     marginBottom: 12,
   },
-  infoSectionTitleDark: {
-    color: '#F2F7F4',
-  },
   infoCard: {
-    borderRadius: 20,
+    borderRadius: 22,
     paddingHorizontal: 20,
     paddingVertical: 14,
-  },
-  infoCardLight: {
-    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: 10,
     elevation: 2,
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-  },
-  infoCardDark: {
-    backgroundColor: '#16201B',
-    borderWidth: 1,
-    borderColor: '#26342B',
   },
   infoRow: {
     flexDirection: 'row',
@@ -488,33 +400,17 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
-    color: '#5C6A61',
     fontWeight: '500',
     marginBottom: 3,
-  },
-  infoLabelDark: {
-    color: '#8A9C91',
   },
   infoValue: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0E1A13',
-  },
-  infoValueDark: {
-    color: '#F2F7F4',
   },
   capitalize: {
     textTransform: 'capitalize',
   },
-  uppercase: {
-    textTransform: 'uppercase',
-  },
   divider: {
     height: 1,
-    backgroundColor: '#ECEAE4',
-  },
-  dividerDark: {
-    backgroundColor: '#26342B',
   },
 });
-

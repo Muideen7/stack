@@ -19,11 +19,13 @@ import { useAuthStore } from '../store/authStore';
 import { useTransactionStore } from '../store/transactionStore';
 import { Conversion } from '../utils/conversion';
 import { Money } from '../utils/money';
+import { getTheme } from '../constants/theme';
 
 export default function ConvertScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const { cards, adjustBalance } = useWalletStore();
   const { rateTable } = useAuthStore();
@@ -41,10 +43,8 @@ export default function ConvertScreen() {
 
   const handleDigit = (digit: string) => {
     Haptics.selectionAsync();
-    // Shift cents
     const nextVal = centsEntered * 10 + parseInt(digit, 10);
     if (nextVal < 10000000) {
-      // cap at $100k
       setCentsEntered(nextVal);
     }
   };
@@ -120,7 +120,7 @@ export default function ConvertScreen() {
     <SafeAreaView
       style={[
         styles.safeArea,
-        isDark ? styles.canvasDark : styles.canvasLight,
+        { backgroundColor: theme.ground },
       ]}
       edges={['top', 'bottom']}
     >
@@ -132,11 +132,11 @@ export default function ConvertScreen() {
         >
           <ArrowLeft
             size={22}
-            color={isDark ? '#F2F7F4' : '#0E1A13'}
+            color={theme.ink}
             weight="bold"
           />
         </Pressable>
-        <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
+        <Text style={[styles.headerTitle, { color: theme.ink }]}>
           Convert
         </Text>
         <View style={styles.headerSpacer} />
@@ -146,32 +146,35 @@ export default function ConvertScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Two Interconnected Cards with Swap Icon */}
+        {/* Two Interconnected Boxes with Swap Icon */}
         <View style={styles.convertBoxesWrapper}>
           {/* Top Box: From */}
           <View
             style={[
-              styles.fromBox,
-              isDark ? styles.fromBoxDark : styles.fromBoxLight,
+              styles.boxCard,
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+              },
             ]}
           >
             <View style={styles.boxHeaderRow}>
-              <Text style={[styles.boxTypeLabel, isDark && styles.boxTypeLabelDark]}>
+              <Text style={[styles.boxTypeLabel, { color: theme.ink2 }]}>
                 From
               </Text>
               <Pressable onPress={cycleFromCard} style={styles.cardPicker}>
-                <Text style={[styles.cardPickerText, isDark && styles.cardPickerTextDark]}>
+                <Text style={[styles.cardPickerText, { color: theme.ink2 }]}>
                   {fromCard.nickname} · •••• {fromCard.last4}
                 </Text>
-                <CaretUpDown size={14} color={isDark ? '#8A9C91' : '#5C6A61'} />
+                <CaretUpDown size={14} color={theme.ink2} />
               </Pressable>
             </View>
 
-            <Text style={[styles.bigAmount, isDark && styles.bigAmountDark]}>
+            <Text style={[styles.bigAmount, { color: theme.ink }]}>
               {formattedFromAmount}
             </Text>
 
-            <Text style={[styles.balanceSubtext, isDark && styles.balanceSubtextDark]}>
+            <Text style={[styles.balanceSubtext, { color: theme.ink3 }]}>
               {Money.format(fromCard.balanceMinor, fromCard.currency)}
             </Text>
           </View>
@@ -181,12 +184,15 @@ export default function ConvertScreen() {
             onPress={handleSwapSides}
             style={[
               styles.swapBadge,
-              isDark ? styles.swapBadgeDark : styles.swapBadgeLight,
+              {
+                backgroundColor: theme.raisedSubtle,
+                borderColor: theme.rule,
+              },
             ]}
           >
             <ArrowsDownUp
               size={18}
-              color={isDark ? '#F2F7F4' : '#0E1A13'}
+              color={theme.ink}
               weight="bold"
             />
           </Pressable>
@@ -194,27 +200,30 @@ export default function ConvertScreen() {
           {/* Bottom Box: To */}
           <View
             style={[
-              styles.toBox,
-              isDark ? styles.toBoxDark : styles.toBoxLight,
+              styles.boxCard,
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+              },
             ]}
           >
             <View style={styles.boxHeaderRow}>
-              <Text style={[styles.boxTypeLabel, isDark && styles.boxTypeLabelDark]}>
+              <Text style={[styles.boxTypeLabel, { color: theme.ink2 }]}>
                 To
               </Text>
               <Pressable onPress={cycleToCard} style={styles.cardPicker}>
-                <Text style={[styles.cardPickerText, isDark && styles.cardPickerTextDark]}>
+                <Text style={[styles.cardPickerText, { color: theme.ink2 }]}>
                   {toCard.nickname} · •••• {toCard.last4}
                 </Text>
-                <CaretUpDown size={14} color={isDark ? '#8A9C91' : '#5C6A61'} />
+                <CaretUpDown size={14} color={theme.ink2} />
               </Pressable>
             </View>
 
-            <Text style={[styles.bigAmount, isDark && styles.bigAmountDark]}>
+            <Text style={[styles.bigAmount, { color: theme.ink }]}>
               {formattedToAmount}
             </Text>
 
-            <Text style={[styles.balanceSubtext, isDark && styles.balanceSubtextDark]}>
+            <Text style={[styles.balanceSubtext, { color: theme.ink3 }]}>
               {Money.format(toCard.balanceMinor, toCard.currency)}
             </Text>
           </View>
@@ -224,32 +233,35 @@ export default function ConvertScreen() {
         <View
           style={[
             styles.infoCard,
-            isDark ? styles.infoCardDark : styles.infoCardLight,
+            {
+              backgroundColor: theme.raised,
+              borderColor: theme.rule,
+            },
           ]}
         >
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
+            <Text style={[styles.infoLabel, { color: theme.ink2 }]}>
               Amount
             </Text>
-            <Text style={[styles.infoVal, isDark && styles.infoValDark]}>
+            <Text style={[styles.infoVal, { color: theme.ink }]}>
               {formattedFromAmount}
             </Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
+            <Text style={[styles.infoLabel, { color: theme.ink2 }]}>
               Fee (0.50%)
             </Text>
-            <Text style={[styles.infoVal, isDark && styles.infoValDark]}>
+            <Text style={[styles.infoVal, { color: theme.ink }]}>
               {feeAmount}
             </Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
+            <Text style={[styles.infoLabel, { color: theme.ink2 }]}>
               Rate
             </Text>
-            <Text style={[styles.infoValBold, isDark && styles.infoValBoldDark]}>
+            <Text style={[styles.infoValBold, { color: theme.ink }]}>
               1 USD = 0.9172 EUR
             </Text>
           </View>
@@ -275,12 +287,16 @@ export default function ConvertScreen() {
                       onPress={handleBackspace}
                       style={[
                         styles.keyCard,
-                        isDark ? styles.keyCardDark : styles.keyCardLight,
+                        {
+                          backgroundColor: theme.raised,
+                          borderColor: theme.rule,
+                        },
                       ]}
                     >
                       <Backspace
                         size={24}
-                        color={isDark ? '#F2F7F4' : '#0E1A13'}
+                        color={theme.ink}
+                        weight="bold"
                       />
                     </Pressable>
                   );
@@ -291,15 +307,13 @@ export default function ConvertScreen() {
                     onPress={() => handleDigit(val)}
                     style={[
                       styles.keyCard,
-                      isDark ? styles.keyCardDark : styles.keyCardLight,
+                      {
+                        backgroundColor: theme.raised,
+                        borderColor: theme.rule,
+                      },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.keyText,
-                        isDark && styles.keyTextDark,
-                      ]}
-                    >
+                    <Text style={[styles.keyText, { color: theme.ink }]}>
                       {val}
                     </Text>
                   </Pressable>
@@ -314,15 +328,16 @@ export default function ConvertScreen() {
           onPress={handleExecuteConvert}
           style={({ pressed }) => [
             styles.convertBtn,
-            isDark ? styles.convertBtnDark : styles.convertBtnLight,
-            { opacity: pressed ? 0.9 : 1 },
+            {
+              backgroundColor: theme.accent,
+              opacity: pressed ? 0.88 : 1,
+            },
           ]}
         >
-          <Text style={styles.convertBtnText}>Convert</Text>
+          <Text style={[styles.convertBtnText, { color: theme.onAccent }]}>Convert</Text>
         </Pressable>
 
-        {/* Subtitle Footer */}
-        <Text style={[styles.footnote, isDark && styles.footnoteDark]}>
+        <Text style={[styles.disclaimerText, { color: theme.ink3 }]}>
           Demo rates are indicative, as of 7 November 2026.
         </Text>
       </ScrollView>
@@ -334,84 +349,56 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  canvasLight: {
-    backgroundColor: '#F4F3EF',
-  },
-  canvasDark: {
-    backgroundColor: '#0E1612',
-  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 10,
+    paddingBottom: 14,
   },
   backButton: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0E1A13',
-    letterSpacing: -0.3,
-  },
-  headerTitleDark: {
-    color: '#F2F7F4',
+    letterSpacing: -0.2,
   },
   headerSpacer: {
-    width: 36,
+    width: 38,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
   convertBoxesWrapper: {
-    marginVertical: 12,
     position: 'relative',
+    marginBottom: 16,
     gap: 8,
   },
-  fromBox: {
+  boxCard: {
     borderRadius: 22,
-    padding: 18,
-    paddingBottom: 22,
-  },
-  fromBoxLight: {
-    backgroundColor: '#EBE9E2',
-  },
-  fromBoxDark: {
-    backgroundColor: '#1C2620',
-  },
-  toBox: {
-    borderRadius: 22,
-    padding: 18,
-    paddingBottom: 22,
+    padding: 20,
     borderWidth: 1,
-  },
-  toBoxLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#ECEAE4',
-  },
-  toBoxDark: {
-    backgroundColor: '#16201B',
-    borderColor: '#26342B',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   boxHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   boxTypeLabel: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#5C6A61',
-  },
-  boxTypeLabelDark: {
-    color: '#8A9C91',
   },
   cardPicker: {
     flexDirection: 'row',
@@ -419,67 +406,44 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   cardPickerText: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '600',
-    color: '#5C6A61',
-  },
-  cardPickerTextDark: {
-    color: '#8A9C91',
   },
   bigAmount: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: '800',
-    color: '#0E1A13',
-    letterSpacing: -0.5,
-    marginBottom: 8,
-  },
-  bigAmountDark: {
-    color: '#F2F7F4',
+    letterSpacing: -0.8,
+    marginVertical: 4,
   },
   balanceSubtext: {
-    fontSize: 13,
-    color: '#5C6A61',
-    alignSelf: 'flex-end',
-  },
-  balanceSubtextDark: {
-    color: '#8A9C91',
+    fontSize: 12.5,
+    fontWeight: '500',
   },
   swapBadge: {
     position: 'absolute',
-    top: '50%',
     left: '50%',
-    marginLeft: -22,
-    marginTop: -22,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    top: '50%',
+    marginLeft: -20,
+    marginTop: -20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
     zIndex: 10,
-    borderWidth: 3,
-  },
-  swapBadgeLight: {
-    backgroundColor: '#DAD8CE',
-    borderColor: '#F4F3EF',
-  },
-  swapBadgeDark: {
-    backgroundColor: '#2E3D33',
-    borderColor: '#0E1612',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 4,
   },
   infoCard: {
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 18,
-    marginVertical: 12,
     borderWidth: 1,
-    gap: 10,
-  },
-  infoCardLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#ECEAE4',
-  },
-  infoCardDark: {
-    backgroundColor: '#16201B',
-    borderColor: '#26342B',
+    marginBottom: 18,
+    gap: 12,
   },
   infoRow: {
     flexDirection: 'row',
@@ -487,31 +451,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   infoLabel: {
-    fontSize: 13.5,
-    color: '#5C6A61',
-  },
-  infoLabelDark: {
-    color: '#8A9C91',
+    fontSize: 13,
+    fontWeight: '500',
   },
   infoVal: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '600',
-    color: '#0E1A13',
-  },
-  infoValDark: {
-    color: '#F2F7F4',
   },
   infoValBold: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0E1A13',
-  },
-  infoValBoldDark: {
-    color: '#F2F7F4',
+    fontSize: 13.5,
+    fontWeight: '800',
   },
   keypadWrapper: {
     gap: 10,
-    marginVertical: 12,
+    marginBottom: 20,
   },
   keypadRow: {
     flexDirection: 'row',
@@ -520,55 +473,42 @@ const styles = StyleSheet.create({
   keyCard: {
     flex: 1,
     height: 56,
-    borderRadius: 16,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-  },
-  keyCardLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E2E0D8',
-  },
-  keyCardDark: {
-    backgroundColor: '#1E2822',
-    borderColor: '#2B3830',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   keyEmpty: {
     flex: 1,
   },
   keyText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#0E1A13',
-  },
-  keyTextDark: {
-    color: '#F2F7F4',
   },
   convertBtn: {
-    height: 52,
-    borderRadius: 26,
+    height: 54,
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
-  },
-  convertBtnLight: {
-    backgroundColor: '#204E35',
-  },
-  convertBtnDark: {
-    backgroundColor: '#225B3C',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 3,
   },
   convertBtnText: {
-    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.2,
   },
-  footnote: {
-    fontSize: 12.5,
-    color: '#5C6A61',
+  disclaimerText: {
+    fontSize: 12,
     textAlign: 'center',
-    marginTop: 14,
-  },
-  footnoteDark: {
-    color: '#8A9C91',
   },
 });

@@ -5,15 +5,21 @@ import { AppleLogo, EnvelopeSimple, GoogleLogo, LockSimple } from 'phosphor-reac
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useColorScheme } from 'nativewind';
 
 import { AuthBackdrop } from '../../components/auth/AuthBackdrop';
 import { AuthBanner } from '../../components/auth/AuthBanner';
 import { AuthField } from '../../components/auth/AuthField';
 import { StackMark } from '../../components/common/StackMark';
 import { useAuthStore } from '../../store/authStore';
+import { getTheme } from '../../constants/theme';
 
 export default function SignInScreen() {
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
+
   const { setAuthenticated } = useAuthStore();
 
   const [email, setEmail] = useState('demo@stack.app');
@@ -35,7 +41,7 @@ export default function SignInScreen() {
         {/* Top Header: Logo on Right */}
         <View style={styles.headerRow}>
           <View />
-          <StackMark size={28} color="#203E2B" />
+          <StackMark size={28} color={theme.accent} />
         </View>
 
         <ScrollView
@@ -44,87 +50,98 @@ export default function SignInScreen() {
         >
           {/* Header Copy */}
           <View style={styles.titleSection}>
-            <Text style={styles.eyebrow}>WELCOME BACK</Text>
-            <Text style={styles.title}>Sign in to Stack</Text>
-            <Text style={styles.subtitle}>Your wallet, exactly where you left it.</Text>
+            <Text style={[styles.eyebrow, { color: theme.accent }]}>WELCOME BACK</Text>
+            <Text style={[styles.title, { color: theme.ink }]}>Sign in to Stack</Text>
+            <Text style={[styles.subtitle, { color: theme.ink2 }]}>Your wallet, exactly where you left it.</Text>
           </View>
 
           {/* Social Auth Buttons */}
           <View style={styles.socialGroup}>
             <Pressable
               onPress={handleSocialAuth}
-              style={styles.appleButton}
+              style={[styles.appleButton, { backgroundColor: isDark ? '#FFFFFF' : '#000000' }]}
             >
-              <AppleLogo size={19} color="#FFFFFF" weight="fill" />
-              <Text style={styles.appleButtonText}>Sign in with Apple</Text>
+              <AppleLogo size={19} color={isDark ? '#000000' : '#FFFFFF'} weight="fill" />
+              <Text style={[styles.appleButtonText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                Sign in with Apple
+              </Text>
             </Pressable>
 
             <Pressable
               onPress={handleSocialAuth}
-              style={styles.googleButton}
+              style={[
+                styles.googleButton,
+                {
+                  backgroundColor: theme.raised,
+                  borderColor: theme.rule,
+                },
+              ]}
             >
-              <GoogleLogo size={19} color="#EA4335" weight="bold" />
-              <Text style={styles.googleButtonText}>Sign in with Google</Text>
+              <GoogleLogo size={19} color={theme.ink} weight="bold" />
+              <Text style={[styles.googleButtonText, { color: theme.ink }]}>
+                Sign in with Google
+              </Text>
             </Pressable>
           </View>
 
           {/* Divider */}
           <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or with email</Text>
-            <View style={styles.dividerLine} />
+            <View style={[styles.dividerLine, { backgroundColor: theme.rule }]} />
+            <Text style={[styles.dividerText, { color: theme.ink3 }]}>or with email</Text>
+            <View style={[styles.dividerLine, { backgroundColor: theme.rule }]} />
           </View>
 
           {/* Demo Hint Banner */}
           <AuthBanner message="Demo account demo@stack.app is filled in. Just press Sign in." />
 
-          {/* Input Fields */}
+          {/* Form */}
           <View style={styles.formSection}>
             <AuthField
               label="Email"
               value={email}
               onChangeText={setEmail}
-              keyboardType="email-address"
+              placeholder="demo@stack.app"
               autoCapitalize="none"
-              leadingIcon={<EnvelopeSimple size={19} color="#6B7770" />}
+              keyboardType="email-address"
+              leadingIcon={<EnvelopeSimple size={19} color={theme.ink2} />}
             />
 
             <AuthField
               label="Password"
               value={password}
               onChangeText={setPassword}
+              placeholder="••••••••"
               isPassword
-              leadingIcon={<LockSimple size={19} color="#6B7770" />}
+              leadingIcon={<LockSimple size={19} color={theme.ink2} />}
               trailingRightAction={
-                <Pressable
-                  onPress={() => router.push('/(auth)/forgot-password')}
-                  hitSlop={8}
-                >
-                  <Text style={styles.forgotLink}>Forgot password?</Text>
+                <Pressable onPress={() => router.push('/(auth)/forgot-password')}>
+                  <Text style={[styles.forgotLink, { color: theme.accent }]}>Forgot password?</Text>
                 </Pressable>
               }
             />
 
-            {/* Primary Action Button */}
             <Pressable
               onPress={handleSignIn}
               style={({ pressed }) => [
                 styles.primaryButton,
-                { opacity: pressed ? 0.9 : 1 },
+                {
+                  backgroundColor: theme.accent,
+                  opacity: pressed ? 0.88 : 1,
+                },
               ]}
             >
-              <Text style={styles.primaryButtonText}>Sign in</Text>
+              <Text style={[styles.primaryButtonText, { color: theme.onAccent }]}>Sign in</Text>
+            </Pressable>
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footerRow}>
+            <Text style={[styles.footerText, { color: theme.ink2 }]}>New here? </Text>
+            <Pressable onPress={() => router.push('/(auth)/sign-up')}>
+              <Text style={[styles.footerLink, { color: theme.accent }]}>Create an account</Text>
             </Pressable>
           </View>
         </ScrollView>
-
-        {/* Footer Navigation */}
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>New here? </Text>
-          <Pressable onPress={() => router.push('/(auth)/sign-up')} hitSlop={8}>
-            <Text style={styles.footerLink}>Create an account</Text>
-          </Pressable>
-        </View>
       </SafeAreaView>
     </AuthBackdrop>
   );
@@ -133,64 +150,56 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: 'space-between',
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 8,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 10,
     paddingBottom: 4,
   },
   scrollContent: {
-    flexGrow: 1,
-    paddingTop: 10,
-    paddingBottom: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 28,
   },
   titleSection: {
+    marginTop: 18,
     marginBottom: 20,
   },
   eyebrow: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '800',
-    color: '#24563B',
     letterSpacing: 1.4,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
-    color: '#0E1A13',
-    lineHeight: 38,
     letterSpacing: -0.5,
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 14.5,
-    color: '#4A564E',
-    lineHeight: 20,
   },
   socialGroup: {
-    gap: 12,
+    gap: 10,
     marginBottom: 16,
   },
   appleButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000000',
     height: 52,
     borderRadius: 26,
     gap: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
     shadowRadius: 5,
     elevation: 2,
   },
   appleButtonText: {
-    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -198,9 +207,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#D8D7D1',
     height: 52,
     borderRadius: 26,
     gap: 8,
@@ -211,7 +218,6 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   googleButtonText: {
-    color: '#0E1A13',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -223,12 +229,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#DCDAD3',
   },
   dividerText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#657169',
     marginHorizontal: 12,
     textTransform: 'lowercase',
   },
@@ -239,23 +243,20 @@ const styles = StyleSheet.create({
   forgotLink: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#204E35',
   },
   primaryButton: {
-    backgroundColor: '#204E35',
     height: 54,
     borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 14,
-    shadowColor: '#1B3E2B',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
     shadowRadius: 10,
-    elevation: 4,
+    elevation: 3,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -263,15 +264,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 18,
   },
   footerText: {
     fontSize: 13.5,
-    color: '#556159',
   },
   footerLink: {
     fontSize: 13.5,
     fontWeight: '700',
-    color: '#204E35',
   },
 });

@@ -21,7 +21,6 @@ import {
   Coffee,
   ShoppingBag,
   ArrowUpRight,
-  DotsThree,
   X,
   CreditCard,
   Clock,
@@ -36,11 +35,13 @@ import { Transaction } from '../types/models';
 import { Money } from '../utils/money';
 import { TxnGrouping } from '../utils/txnGrouping';
 import { TransactionFilterSheet } from '../components/transactions/TransactionFilterSheet';
+import { getTheme } from '../constants/theme';
 
 export default function TransactionsScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const {
     transactions,
@@ -122,7 +123,7 @@ export default function TransactionsScreen() {
     <SafeAreaView
       style={[
         styles.safeArea,
-        isDark ? styles.canvasDark : styles.canvasLight,
+        { backgroundColor: theme.ground },
       ]}
       edges={['top', 'bottom']}
     >
@@ -134,12 +135,12 @@ export default function TransactionsScreen() {
         >
           <ArrowLeft
             size={22}
-            color={isDark ? '#F2F7F4' : '#0E1A13'}
+            color={theme.ink}
             weight="bold"
           />
         </Pressable>
 
-        <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
+        <Text style={[styles.headerTitle, { color: theme.ink }]}>
           Activity
         </Text>
 
@@ -153,7 +154,7 @@ export default function TransactionsScreen() {
           >
             <Funnel
               size={20}
-              color={isDark ? '#F2F7F4' : '#0E1A13'}
+              color={theme.ink}
               weight="bold"
             />
           </Pressable>
@@ -167,7 +168,7 @@ export default function TransactionsScreen() {
           >
             <Plus
               size={22}
-              color={isDark ? '#F2F7F4' : '#0E1A13'}
+              color={theme.ink}
               weight="bold"
             />
           </Pressable>
@@ -179,27 +180,30 @@ export default function TransactionsScreen() {
         <View
           style={[
             styles.searchBar,
-            isDark ? styles.searchBarDark : styles.searchBarLight,
+            {
+              backgroundColor: theme.raised,
+              borderColor: theme.rule,
+            },
           ]}
         >
           <MagnifyingGlass
             size={18}
-            color={isDark ? '#8A9C91' : '#6A7870'}
+            color={theme.ink2}
             weight="bold"
           />
           <TextInput
             placeholder="Search a merchant"
-            placeholderTextColor={isDark ? '#8A9C91' : '#8A968E'}
+            placeholderTextColor={theme.ink3}
             value={searchQuery}
             onChangeText={setSearchQuery}
             style={[
               styles.searchInput,
-              isDark ? styles.searchInputDark : styles.searchInputLight,
+              { color: theme.ink },
             ]}
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={() => setSearchQuery('')}>
-              <X size={16} color={isDark ? '#8A9C91' : '#6A7870'} />
+              <X size={16} color={theme.ink2} />
             </Pressable>
           )}
         </View>
@@ -217,10 +221,10 @@ export default function TransactionsScreen() {
             <View key={group.label} style={styles.groupSection}>
               {/* Group Header Row */}
               <View style={styles.groupHeaderRow}>
-                <Text style={[styles.groupDateLabel, isDark && styles.groupDateLabelDark]}>
+                <Text style={[styles.groupDateLabel, { color: theme.ink }]}>
                   {group.label}
                 </Text>
-                <Text style={[styles.groupNetLabel, isDark && styles.groupNetLabelDark]}>
+                <Text style={[styles.groupNetLabel, { color: theme.ink2 }]}>
                   {netLabel}
                 </Text>
               </View>
@@ -240,29 +244,27 @@ export default function TransactionsScreen() {
                         { opacity: pressed ? 0.75 : 1 },
                       ]}
                     >
-                      <View style={styles.itemLeftCol}>
+                      <View style={styles.leftGroup}>
                         <View
                           style={[
                             styles.iconBox,
-                            isDark ? styles.iconBoxDark : styles.iconBoxLight,
+                            {
+                              backgroundColor: theme.raisedSubtle,
+                              borderColor: theme.rule,
+                            },
                           ]}
                         >
                           <IconComp
                             size={20}
-                            color={isDark ? '#A2B5A8' : '#3E4E44'}
+                            color={theme.ink}
                             weight="bold"
                           />
                         </View>
                         <View style={styles.metaCol}>
-                          <Text
-                            style={[styles.merchantTitle, isDark && styles.merchantTitleDark]}
-                            numberOfLines={1}
-                          >
+                          <Text style={[styles.merchantTitle, { color: theme.ink }]} numberOfLines={1}>
                             {tx.merchant}
                           </Text>
-                          <Text
-                            style={[styles.categorySubtitle, isDark && styles.categorySubtitleDark]}
-                          >
+                          <Text style={[styles.categorySubtitle, { color: theme.ink2 }]}>
                             {tx.category} · •••• {last4}
                           </Text>
                         </View>
@@ -271,7 +273,9 @@ export default function TransactionsScreen() {
                       <Text
                         style={[
                           styles.amountText,
-                          isDark && styles.amountTextDark,
+                          {
+                            color: tx.amountMinor > 0 ? theme.positive : theme.ink,
+                          },
                         ]}
                       >
                         {Money.signed(tx.amountMinor, tx.currency)}
@@ -285,14 +289,14 @@ export default function TransactionsScreen() {
         })}
       </ScrollView>
 
-      {/* Filter Bottom Sheet Modal */}
+      {/* Filter Bottom Sheet */}
       <TransactionFilterSheet
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
         selectedCard={filterCard}
         onChangeCard={setFilterCard}
         selectedCategory={selectedCategory}
-        onChangeCategory={(cat) => setSelectedCategory(cat)}
+        onChangeCategory={setSelectedCategory}
         selectedDateRange={filterDateRange}
         onChangeDateRange={setFilterDateRange}
         onApply={() => setFilterVisible(false)}
@@ -304,9 +308,9 @@ export default function TransactionsScreen() {
         }}
       />
 
-      {/* Transaction Detail & Notes Modal */}
+      {/* Transaction Detail Bottom Sheet Modal */}
       {selectedTx && (
-        <Modal visible={Boolean(selectedTx)} transparent animationType="slide">
+        <Modal visible transparent animationType="slide">
           <View style={styles.detailModalRoot}>
             <Pressable
               style={styles.scrimBackdrop}
@@ -316,52 +320,85 @@ export default function TransactionsScreen() {
               edges={['bottom']}
               style={[
                 styles.detailSheet,
-                isDark ? styles.detailSheetDark : styles.detailSheetLight,
+                {
+                  backgroundColor: theme.raised,
+                },
               ]}
             >
               <View style={styles.detailHeader}>
-                <Text style={[styles.detailTitle, isDark && styles.detailTitleDark]}>
+                <Text style={[styles.detailTitle, { color: theme.ink }]}>
                   {selectedTx.merchant}
                 </Text>
                 <Pressable onPress={() => setSelectedTx(null)}>
-                  <X size={20} color={isDark ? '#8A9C91' : '#5C6A61'} />
+                  <X size={20} color={theme.ink2} />
                 </Pressable>
               </View>
 
-              <Text style={[styles.detailAmount, isDark && styles.detailAmountDark]}>
+              <Text
+                style={[
+                  styles.detailAmount,
+                  { color: selectedTx.amountMinor > 0 ? theme.positive : theme.ink },
+                ]}
+              >
                 {Money.signed(selectedTx.amountMinor, selectedTx.currency)}
               </Text>
 
-              <View style={styles.detailRowsCard}>
+              {/* Detail fields card */}
+              <View
+                style={[
+                  styles.detailRowsCard,
+                  {
+                    backgroundColor: theme.raisedSubtle,
+                    borderColor: theme.rule,
+                  },
+                ]}
+              >
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Category</Text>
-                  <Text style={styles.detailVal}>{selectedTx.category}</Text>
+                  <Text style={[styles.detailLabel, { color: theme.ink2 }]}>Category</Text>
+                  <Text style={[styles.detailVal, { color: theme.ink }]}>{selectedTx.category}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Date</Text>
-                  <Text style={styles.detailVal}>
-                    {new Date(selectedTx.occurredAt).toLocaleString()}
+                  <Text style={[styles.detailLabel, { color: theme.ink2 }]}>Card</Text>
+                  <Text style={[styles.detailVal, { color: theme.ink }]}>
+                    •••• {cardLast4Map[selectedTx.cardId] || '8152'}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={[styles.detailLabel, { color: theme.ink2 }]}>Date</Text>
+                  <Text style={[styles.detailVal, { color: theme.ink }]}>
+                    {new Date(selectedTx.occurredAt).toLocaleDateString()}
                   </Text>
                 </View>
               </View>
 
-              <Text style={styles.noteLabel}>NOTE</Text>
+              {/* Note input field */}
+              <Text style={[styles.noteLabel, { color: theme.ink2 }]}>NOTE</Text>
               <TextInput
                 value={editingNote}
                 onChangeText={setEditingNote}
-                placeholder="Add note or receipt reference..."
-                placeholderTextColor="#8A9C91"
+                placeholder="Add a memo..."
+                placeholderTextColor={theme.ink3}
                 style={[
                   styles.noteInput,
-                  isDark ? styles.noteInputDark : styles.noteInputLight,
+                  {
+                    backgroundColor: theme.raised,
+                    borderColor: theme.rule,
+                    color: theme.ink,
+                  },
                 ]}
               />
 
               <Pressable
                 onPress={handleSaveNote}
-                style={[styles.saveNoteBtn, styles.saveNoteBtnLight]}
+                style={({ pressed }) => [
+                  styles.saveNoteBtn,
+                  {
+                    backgroundColor: theme.accent,
+                    opacity: pressed ? 0.88 : 1,
+                  },
+                ]}
               >
-                <Text style={styles.saveNoteBtnText}>Save</Text>
+                <Text style={[styles.saveNoteBtnText, { color: theme.onAccent }]}>Save Note</Text>
               </Pressable>
             </SafeAreaView>
           </View>
@@ -375,39 +412,29 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  canvasLight: {
-    backgroundColor: '#F4F3EF',
-  },
-  canvasDark: {
-    backgroundColor: '#0E1612',
-  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 10,
+    paddingTop: 10,
+    paddingBottom: 12,
+  },
+  iconButton: {
+    width: 38,
+    height: 38,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.3,
-  },
-  headerTitleDark: {
-    color: '#F2F7F4',
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-  },
-  iconButton: {
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: 8,
   },
   searchWrapper: {
     paddingHorizontal: 20,
@@ -417,28 +444,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 48,
-    borderRadius: 14,
-    paddingHorizontal: 14,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    gap: 10,
     borderWidth: 1,
-  },
-  searchBarLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E2E0D8',
-  },
-  searchBarDark: {
-    backgroundColor: '#16201B',
-    borderColor: '#26342B',
   },
   searchInput: {
     flex: 1,
     fontSize: 14.5,
-    marginLeft: 10,
-  },
-  searchInputLight: {
-    color: '#0E1A13',
-  },
-  searchInputDark: {
-    color: '#F2F7F4',
+    fontWeight: '500',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -456,29 +470,22 @@ const styles = StyleSheet.create({
   groupDateLabel: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#0E1A13',
-  },
-  groupDateLabelDark: {
-    color: '#F2F7F4',
+    letterSpacing: -0.1,
   },
   groupNetLabel: {
     fontSize: 12.5,
-    color: '#5C6A61',
-    fontWeight: '500',
-  },
-  groupNetLabelDark: {
-    color: '#8A9C91',
+    fontWeight: '600',
   },
   itemsStack: {
-    gap: 8,
+    gap: 12,
   },
   txItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 3,
   },
-  itemLeftCol: {
+  leftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
@@ -491,12 +498,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
-  },
-  iconBoxLight: {
-    backgroundColor: '#EBE9E2',
-  },
-  iconBoxDark: {
-    backgroundColor: '#202B24',
+    borderWidth: 1,
   },
   metaCol: {
     flex: 1,
@@ -504,26 +506,14 @@ const styles = StyleSheet.create({
   merchantTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0E1A13',
     marginBottom: 2,
-  },
-  merchantTitleDark: {
-    color: '#F2F7F4',
   },
   categorySubtitle: {
     fontSize: 12.5,
-    color: '#5C6A61',
-  },
-  categorySubtitleDark: {
-    color: '#8A9C91',
   },
   amountText: {
     fontSize: 15.5,
     fontWeight: '800',
-    color: '#0E1A13',
-  },
-  amountTextDark: {
-    color: '#F2F7F4',
   },
   detailModalRoot: {
     flex: 1,
@@ -540,12 +530,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 28,
   },
-  detailSheetLight: {
-    backgroundColor: '#FFFFFF',
-  },
-  detailSheetDark: {
-    backgroundColor: '#16201B',
-  },
   detailHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -555,25 +539,17 @@ const styles = StyleSheet.create({
   detailTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#0E1A13',
-  },
-  detailTitleDark: {
-    color: '#F2F7F4',
   },
   detailAmount: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#0E1A13',
     marginBottom: 16,
   },
-  detailAmountDark: {
-    color: '#F2F7F4',
-  },
   detailRowsCard: {
-    backgroundColor: '#F4F3EF',
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     gap: 8,
+    borderWidth: 1,
     marginBottom: 16,
   },
   detailRow: {
@@ -582,17 +558,14 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 13,
-    color: '#5C6A61',
   },
   detailVal: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#0E1A13',
   },
   noteLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#556159',
     letterSpacing: 1.2,
     marginBottom: 6,
   },
@@ -604,28 +577,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 16,
   },
-  noteInputLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E2E0D8',
-    color: '#0E1A13',
-  },
-  noteInputDark: {
-    backgroundColor: '#202B24',
-    borderColor: '#2D3C33',
-    color: '#F2F7F4',
-  },
   saveNoteBtn: {
-    height: 48,
-    borderRadius: 24,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  saveNoteBtnLight: {
-    backgroundColor: '#204E35',
   },
   saveNoteBtnText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
   },
 });

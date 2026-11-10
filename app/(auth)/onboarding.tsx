@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import * as Haptics from '@/utils/haptics';
 import { useAuthStore } from '../../store/authStore';
 import { AuthBackdrop } from '../../components/auth/AuthBackdrop';
@@ -12,6 +13,7 @@ import {
   SpendingMotif,
   PrivacyMotif,
 } from '../../components/auth/OnboardingMotifs';
+import { getTheme } from '../../constants/theme';
 
 const SLIDES = [
   {
@@ -33,6 +35,10 @@ const SLIDES = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
+
   const { setOnboardingCompleted } = useAuthStore();
   const [index, setIndex] = useState(0);
 
@@ -58,64 +64,70 @@ export default function OnboardingScreen() {
   return (
     <AuthBackdrop>
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        {/* Top Header: Logo on Left & Skip on Right */}
-        <View style={styles.headerRow}>
-          <StackMark size={28} color="#203E2B" />
+        {/* Top Header: Official Stack Brand Logo (Left) + Skip (Right) */}
+        <View style={styles.header}>
+          <StackMark size={28} color={theme.accent} />
 
-          <Pressable onPress={handleSkip} hitSlop={12} style={styles.skipButton}>
-            <Text style={styles.skipText}>Skip</Text>
+          <Pressable onPress={handleSkip} style={styles.skipButton}>
+            <Text style={[styles.skipText, { color: theme.accent }]}>Skip</Text>
           </Pressable>
         </View>
 
-        {/* Center Artwork Area */}
+        {/* Motif Illustration Area */}
         <View style={styles.motifContainer}>
-          {index === 0 && <StackMotif active={index === 0} />}
-          {index === 1 && <SpendingMotif active={index === 1} />}
-          {index === 2 && <PrivacyMotif active={index === 2} />}
+          {index === 0 && <StackMotif />}
+          {index === 1 && <SpendingMotif />}
+          {index === 2 && <PrivacyMotif />}
         </View>
 
         {/* Copy Section */}
         <View style={styles.copyContainer}>
-          <Text style={styles.eyebrow}>{current.eyebrow}</Text>
-          <Text style={styles.title}>{current.title}</Text>
-          <Text style={styles.body}>{current.body}</Text>
+          <Text style={[styles.eyebrow, { color: theme.accent }]}>{current.eyebrow}</Text>
+          <Text style={[styles.title, { color: theme.ink }]}>{current.title}</Text>
+          <Text style={[styles.body, { color: theme.ink2 }]}>{current.body}</Text>
         </View>
 
-        {/* Bottom Section: Progress + CTA + Subtext */}
+        {/* Bottom Navigation */}
         <View style={styles.bottomContainer}>
-          {/* 3-segment progress indicator */}
+          {/* Segmented Progress Bars */}
           <View style={styles.progressRow}>
             {SLIDES.map((_, i) => (
-              <Pressable
+              <View
                 key={i}
-                onPress={() => setIndex(i)}
-                style={styles.progressTrack}
+                style={[
+                  styles.progressTrack,
+                  { backgroundColor: theme.rule },
+                ]}
               >
                 <View
                   style={[
                     styles.progressFill,
-                    { backgroundColor: i <= index ? '#204E35' : '#D6D5CE' },
+                    {
+                      backgroundColor: i <= index ? theme.accent : 'transparent',
+                    },
                   ]}
                 />
-              </Pressable>
+              </View>
             ))}
           </View>
 
-          {/* Primary Action Button */}
+          {/* Continue / Get Started CTA */}
           <Pressable
             onPress={handleNext}
             style={({ pressed }) => [
               styles.ctaButton,
-              { opacity: pressed ? 0.9 : 1 },
+              {
+                backgroundColor: theme.accent,
+                opacity: pressed ? 0.88 : 1,
+              },
             ]}
           >
-            <Text style={styles.ctaText}>
+            <Text style={[styles.ctaText, { color: theme.onAccent }]}>
               {isLast ? 'Get started' : 'Continue'}
             </Text>
           </Pressable>
 
-          {/* Subtext */}
-          <Text style={styles.subtext}>No account needed to look around.</Text>
+          <Text style={[styles.subtext, { color: theme.ink3 }]}>No account needed to look around.</Text>
         </View>
       </SafeAreaView>
     </AuthBackdrop>
@@ -125,13 +137,13 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     justifyContent: 'space-between',
   },
-  headerRow: {
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingTop: 8,
   },
   skipButton: {
@@ -140,8 +152,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#204E35',
+    fontWeight: '700',
   },
   motifContainer: {
     flex: 1,
@@ -154,21 +165,18 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#24563B',
     letterSpacing: 1.4,
     marginBottom: 8,
   },
   title: {
     fontSize: 34,
     fontWeight: '800',
-    color: '#0E1A13',
     lineHeight: 40,
     letterSpacing: -0.5,
     marginBottom: 12,
   },
   body: {
     fontSize: 15,
-    color: '#414D45',
     lineHeight: 23,
     letterSpacing: -0.1,
   },
@@ -185,7 +193,6 @@ const styles = StyleSheet.create({
     height: 3.5,
     borderRadius: 2,
     overflow: 'hidden',
-    backgroundColor: '#D6D5CE',
   },
   progressFill: {
     width: '100%',
@@ -193,26 +200,23 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   ctaButton: {
-    backgroundColor: '#204E35',
     height: 54,
     borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#1B3E2B',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
     shadowRadius: 10,
-    elevation: 4,
+    elevation: 3,
   },
   ctaText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
   subtext: {
     fontSize: 12.5,
-    color: '#6E7871',
     textAlign: 'center',
     marginTop: 12,
   },

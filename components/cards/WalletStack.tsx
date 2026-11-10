@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from '@/utils/haptics';
 import { PaymentCard } from '../../types/models';
 import { CardFace } from './CardFace';
+import { getTheme } from '../../constants/theme';
 
 interface WalletStackProps {
   cards: PaymentCard[];
@@ -24,6 +25,7 @@ export const WalletStack: React.FC<WalletStackProps> = ({
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const handleAddCard = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -39,7 +41,7 @@ export const WalletStack: React.FC<WalletStackProps> = ({
       {/* Cascading Cards */}
       <View style={styles.cardsLayer}>
         {cards.map((card, idx) => {
-          const offsetTop = idx === 0 ? 0 : -148; // Cascades smoothly showing header of each card
+          const offsetTop = idx === 0 ? 0 : -148;
 
           return (
             <Pressable
@@ -66,17 +68,21 @@ export const WalletStack: React.FC<WalletStackProps> = ({
           onPress={handleAddCard}
           style={[
             styles.addSlotCard,
-            isDark ? styles.addSlotDark : styles.addSlotLight,
-            { marginTop: -148, zIndex: cards.length + 1 },
+            {
+              backgroundColor: theme.raisedSubtle,
+              borderColor: theme.rule,
+              marginTop: -148,
+              zIndex: cards.length + 1,
+            },
           ]}
         >
-          <View style={[styles.plusBadge, isDark && styles.plusBadgeDark]}>
-            <Plus size={22} color={isDark ? '#F0F5F2' : '#223026'} weight="bold" />
+          <View style={[styles.plusBadge, { backgroundColor: theme.raised, borderColor: theme.rule }]}>
+            <Plus size={22} color={theme.ink} weight="bold" />
           </View>
-          <Text style={[styles.addCardTitle, isDark && styles.addCardTitleDark]}>
+          <Text style={[styles.addCardTitle, { color: theme.ink }]}>
             Add a card
           </Text>
-          <Text style={[styles.addCardSubtitle, isDark && styles.addCardSubtitleDark]}>
+          <Text style={[styles.addCardSubtitle, { color: theme.ink2 }]}>
             Debit or credit, detected as you type
           </Text>
         </Pressable>
@@ -84,10 +90,10 @@ export const WalletStack: React.FC<WalletStackProps> = ({
 
       {/* Footer Text under the wallet */}
       <View style={styles.footerSection}>
-        <Text style={[styles.walletTitle, isDark && styles.walletTitleDark]}>
+        <Text style={[styles.walletTitle, { color: theme.ink }]}>
           Your wallet
         </Text>
-        <Text style={[styles.walletSubtitle, isDark && styles.walletSubtitleDark]}>
+        <Text style={[styles.walletSubtitle, { color: theme.ink2 }]}>
           {cards.length} cards · tap one to open
         </Text>
       </View>
@@ -115,49 +121,30 @@ const styles = StyleSheet.create({
   addSlotCard: {
     width: '100%',
     aspectRatio: 1.58,
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1.5,
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
   },
-  addSlotLight: {
-    backgroundColor: '#EBE9E2',
-    borderColor: '#CFCDBF',
-  },
-  addSlotDark: {
-    backgroundColor: '#1C2620',
-    borderColor: '#304237',
-  },
   plusBadge: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#DAD8CF',
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
-  plusBadgeDark: {
-    backgroundColor: '#293A30',
-  },
   addCardTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0E1A13',
     marginBottom: 4,
-  },
-  addCardTitleDark: {
-    color: '#F2F7F4',
   },
   addCardSubtitle: {
     fontSize: 13,
-    color: '#5C6A61',
     textAlign: 'center',
-  },
-  addCardSubtitleDark: {
-    color: '#8A9C91',
   },
   footerSection: {
     alignItems: 'center',
@@ -166,19 +153,10 @@ const styles = StyleSheet.create({
   walletTitle: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.5,
     marginBottom: 4,
   },
-  walletTitleDark: {
-    color: '#F2F7F4',
-  },
   walletSubtitle: {
     fontSize: 13.5,
-    color: '#5C6A61',
-  },
-  walletSubtitleDark: {
-    color: '#8A9C91',
   },
 });
-

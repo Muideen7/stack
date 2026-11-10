@@ -5,17 +5,22 @@ import { useColorScheme } from 'nativewind';
 import { CreditCard, House, User } from 'phosphor-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { getTheme } from '../../constants/theme';
 
 export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   return (
     <View style={styles.floatingWrapper} pointerEvents="box-none">
       <View
         style={[
           styles.barContainer,
-          isDark ? styles.barContainerDark : styles.barContainerLight,
+          {
+            backgroundColor: theme.navBackground,
+            borderColor: theme.navBorder,
+          },
         ]}
       >
         {state.routes.map((route, index) => {
@@ -35,9 +40,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
             }
           };
 
-          const iconColor = isFocused
-            ? (isDark ? '#4ADE80' : '#204E35')
-            : (isDark ? '#8A9B91' : '#4C5A51');
+          const iconColor = isFocused ? theme.accent : theme.ink2;
 
           return (
             <Pressable
@@ -45,24 +48,24 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
               onPress={onPress}
               style={[
                 styles.tabItem,
-                isFocused && (isDark ? styles.tabItemActiveDark : styles.tabItemActiveLight),
+                isFocused && { backgroundColor: theme.accentSoft },
               ]}
             >
               {route.name === 'index' && (
-                <House size={22} color={iconColor} weight={isFocused ? 'fill' : 'regular'} />
+                <House size={22} color={iconColor} weight={isFocused ? 'fill' : 'bold'} />
               )}
               {route.name === 'cards' && (
-                <CreditCard size={22} color={iconColor} weight={isFocused ? 'fill' : 'regular'} />
+                <CreditCard size={22} color={iconColor} weight={isFocused ? 'fill' : 'bold'} />
               )}
               {route.name === 'profile' && (
-                <User size={22} color={iconColor} weight={isFocused ? 'fill' : 'regular'} />
+                <User size={22} color={iconColor} weight={isFocused ? 'fill' : 'bold'} />
               )}
 
               {isFocused && (
                 <Text
                   style={[
                     styles.tabLabel,
-                    { color: isDark ? '#4ADE80' : '#204E35' },
+                    { color: theme.accent },
                   ]}
                 >
                   {options.title ?? route.name}
@@ -90,40 +93,25 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 8,
     borderRadius: 36,
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
+    shadowOpacity: 0.10,
+    shadowRadius: 18,
     elevation: 8,
     gap: 6,
-  },
-  barContainerLight: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-  },
-  barContainerDark: {
-    backgroundColor: '#16201B',
-    borderWidth: 1,
-    borderColor: '#26352D',
   },
   tabItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 28,
-  },
-  tabItemActiveLight: {
-    backgroundColor: '#E2EDE6',
-  },
-  tabItemActiveDark: {
-    backgroundColor: '#1E3929',
+    paddingHorizontal: 18,
+    borderRadius: 24,
   },
   tabLabel: {
     fontSize: 13.5,
     fontWeight: '700',
     marginLeft: 8,
+    letterSpacing: -0.2,
   },
 });
-

@@ -4,15 +4,21 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Backspace } from 'phosphor-react-native';
+import { useColorScheme } from 'nativewind';
 import * as Haptics from '@/utils/haptics';
 
 import { useAuthStore } from '../../store/authStore';
 import { AuthBackdrop } from '../../components/auth/AuthBackdrop';
 import { StackMark } from '../../components/common/StackMark';
+import { getTheme } from '../../constants/theme';
 
 export default function PinScreen() {
   const router = useRouter();
-  const { setPin, setAuthenticated } = useAuthStore();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
+
+  const { setPin } = useAuthStore();
   const [entered, setEntered] = useState('');
 
   const handleDigit = (digit: string) => {
@@ -44,13 +50,13 @@ export default function PinScreen() {
         {/* Top Header */}
         <View style={styles.headerRow}>
           <View />
-          <StackMark size={28} color="#203E2B" />
+          <StackMark size={28} color={theme.accent} />
         </View>
 
         {/* Center Title & 4-circle PIN indicator */}
         <View style={styles.centerSection}>
-          <Text style={styles.title}>Set a PIN</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: theme.ink }]}>Set a PIN</Text>
+          <Text style={[styles.subtitle, { color: theme.ink2 }]}>
             You will use this to open Stack. 4 digits.
           </Text>
 
@@ -63,7 +69,10 @@ export default function PinScreen() {
                   key={i}
                   style={[
                     styles.circleIndicator,
-                    filled && styles.circleIndicatorFilled,
+                    {
+                      borderColor: filled ? theme.accent : theme.rule,
+                      backgroundColor: filled ? theme.accent : 'transparent',
+                    },
                   ]}
                 />
               );
@@ -94,7 +103,7 @@ export default function PinScreen() {
                         { opacity: pressed ? 0.6 : 1 },
                       ]}
                     >
-                      <Backspace size={26} color="#3A463E" />
+                      <Backspace size={26} color={theme.ink} weight="bold" />
                     </Pressable>
                   );
                 }
@@ -104,10 +113,14 @@ export default function PinScreen() {
                     onPress={() => handleDigit(val)}
                     style={({ pressed }) => [
                       styles.keyCard,
-                      { opacity: pressed ? 0.8 : 1 },
+                      {
+                        backgroundColor: theme.raised,
+                        borderColor: theme.rule,
+                        opacity: pressed ? 0.8 : 1,
+                      },
                     ]}
                   >
-                    <Text style={styles.keyDigitText}>{val}</Text>
+                    <Text style={[styles.keyDigitText, { color: theme.ink }]}>{val}</Text>
                   </Pressable>
                 );
               })}
@@ -139,13 +152,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.5,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14.5,
-    color: '#4B574F',
     textAlign: 'center',
     marginBottom: 36,
   },
@@ -159,12 +170,6 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 7,
     borderWidth: 1.8,
-    borderColor: '#738077',
-    backgroundColor: 'transparent',
-  },
-  circleIndicatorFilled: {
-    borderColor: '#204E35',
-    backgroundColor: '#204E35',
   },
   keypadWrapper: {
     paddingBottom: 20,
@@ -177,32 +182,29 @@ const styles = StyleSheet.create({
   },
   keyCard: {
     flex: 1,
-    height: 62,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    height: 60,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#E2E0D8',
   },
   keyButtonEmpty: {
     flex: 1,
-    height: 62,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
   },
   keyEmpty: {
     flex: 1,
-    height: 62,
+    height: 60,
   },
   keyDigitText: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '800',
-    color: '#0E1A13',
   },
 });

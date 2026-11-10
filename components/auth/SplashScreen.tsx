@@ -1,6 +1,6 @@
 // components/auth/SplashScreen.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import Svg, { Rect } from 'react-native-svg';
 import Animated, {
   useSharedValue,
@@ -8,18 +8,23 @@ import Animated, {
   withTiming,
   withSpring,
   withDelay,
-  withSequence,
   runOnJS,
   Easing,
 } from 'react-native-reanimated';
+import { useColorScheme } from 'nativewind';
 import * as Haptics from '@/utils/haptics';
 import { AuthBackdrop } from './AuthBackdrop';
+import { getTheme } from '../../constants/theme';
 
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
+
   // Phase 1: Mark strata slide in
   const stratum0 = useSharedValue(-100);
   const stratum1 = useSharedValue(100);
@@ -139,19 +144,19 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             <View style={{ width: w, height: h, position: 'relative' }}>
               <Animated.View style={[StyleSheet.absoluteFill, stratum0Style]}>
                 <Svg width={w} height={h} viewBox="0 0 28 20" fill="none">
-                  <Rect x="0" y="0" width="22" height="4.5" rx="2" fill="#204E35" fillOpacity={1.0} />
+                  <Rect x="0" y="0" width="22" height="4.5" rx="2" fill={theme.accent} fillOpacity={1.0} />
                 </Svg>
               </Animated.View>
 
               <Animated.View style={[StyleSheet.absoluteFill, stratum1Style]}>
                 <Svg width={w} height={h} viewBox="0 0 28 20" fill="none">
-                  <Rect x="3" y="7.5" width="22" height="4.5" rx="2" fill="#204E35" fillOpacity={0.75} />
+                  <Rect x="3" y="7.5" width="22" height="4.5" rx="2" fill={theme.accent} fillOpacity={0.75} />
                 </Svg>
               </Animated.View>
 
               <Animated.View style={[StyleSheet.absoluteFill, stratum2Style]}>
                 <Svg width={w} height={h} viewBox="0 0 28 20" fill="none">
-                  <Rect x="6" y="15" width="22" height="4.5" rx="2" fill="#204E35" fillOpacity={0.50} />
+                  <Rect x="6" y="15" width="22" height="4.5" rx="2" fill={theme.accent} fillOpacity={0.50} />
                 </Svg>
               </Animated.View>
             </View>
@@ -159,16 +164,16 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
           {/* Wordmark Container (Clipped Baseline) */}
           <View style={styles.wordmarkClipper}>
-            <Animated.Text style={[styles.wordmarkText, wordmarkStyle]}>
+            <Animated.Text style={[styles.wordmarkText, { color: theme.ink }, wordmarkStyle]}>
               STACK
             </Animated.Text>
           </View>
 
           {/* Accent Hairline */}
-          <Animated.View style={[styles.hairline, hairlineStyle]} />
+          <Animated.View style={[styles.hairline, { backgroundColor: theme.accent }, hairlineStyle]} />
 
           {/* Tagline */}
-          <Animated.Text style={[styles.taglineText, taglineStyle]}>
+          <Animated.Text style={[styles.taglineText, { color: theme.ink2 }, taglineStyle]}>
             Every card, one balance.
           </Animated.Text>
         </View>
@@ -201,7 +206,6 @@ const styles = StyleSheet.create({
   wordmarkText: {
     fontSize: 40,
     fontWeight: '900',
-    color: '#0E1A13',
     letterSpacing: -0.5,
     lineHeight: 44,
   },
@@ -209,13 +213,11 @@ const styles = StyleSheet.create({
     width: 52,
     height: 2,
     borderRadius: 1,
-    backgroundColor: '#204E35',
     marginVertical: 14,
   },
   taglineText: {
     fontSize: 14.5,
     fontWeight: '500',
-    color: '#4B574F',
     letterSpacing: 0.2,
   },
 });

@@ -1,10 +1,11 @@
 // components/home/RecentActivity.tsx
-import { useColorScheme } from 'nativewind';
-import { Coffee, Receipt, ShoppingBag, Train } from 'phosphor-react-native';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { Train, Coffee, ShoppingBag, Receipt } from 'phosphor-react-native';
+import { useColorScheme } from 'nativewind';
 import { Transaction } from '../../types/models';
 import { Money } from '../../utils/money';
+import { getTheme } from '../../constants/theme';
 
 interface RecentActivityProps {
   transactions: Transaction[];
@@ -19,6 +20,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
 }) => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const getIcon = (merchant: string, category: string) => {
     if (merchant.toLowerCase().includes('rail') || category === 'Transport') {
@@ -36,12 +38,12 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={[styles.title, isDark && styles.titleDark]}>
+        <Text style={[styles.title, { color: theme.ink }]}>
           Recent activity
         </Text>
         {onViewAll && (
           <Pressable onPress={onViewAll}>
-            <Text style={[styles.seeAll, isDark && styles.seeAllDark]}>
+            <Text style={[styles.seeAll, { color: theme.accent }]}>
               See all
             </Text>
           </Pressable>
@@ -51,7 +53,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       <View style={styles.listContainer}>
         {transactions.slice(0, 4).map((tx) => {
           const IconComp = getIcon(tx.merchant, tx.category);
-          const iconColor = isDark ? '#A2B5A8' : '#3E4E44';
 
           return (
             <Pressable
@@ -66,25 +67,28 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
                 <View
                   style={[
                     styles.iconBox,
-                    isDark ? styles.iconBoxDark : styles.iconBoxLight,
+                    {
+                      backgroundColor: theme.raisedSubtle,
+                      borderColor: theme.rule,
+                    },
                   ]}
                 >
-                  <IconComp size={20} color={iconColor} weight="bold" />
+                  <IconComp size={20} color={theme.ink} weight="bold" />
                 </View>
                 <View style={styles.metaCol}>
                   <Text
-                    style={[styles.merchantText, isDark && styles.merchantTextDark]}
+                    style={[styles.merchantText, { color: theme.ink }]}
                     numberOfLines={1}
                   >
                     {tx.merchant}
                   </Text>
-                  <Text style={[styles.categoryText, isDark && styles.categoryTextDark]}>
+                  <Text style={[styles.categoryText, { color: theme.ink2 }]}>
                     {tx.category} · •••• 8152
                   </Text>
                 </View>
               </View>
 
-              <Text style={[styles.amountText, isDark && styles.amountTextDark]}>
+              <Text style={[styles.amountText, { color: theme.ink }]}>
                 {Money.signed(tx.amountMinor, tx.currency)}
               </Text>
             </Pressable>
@@ -108,19 +112,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.2,
-  },
-  titleDark: {
-    color: '#F2F7F4',
   },
   seeAll: {
     fontSize: 13.5,
     fontWeight: '700',
-    color: '#204E35',
-  },
-  seeAllDark: {
-    color: '#4ADE80',
   },
   listContainer: {
     gap: 12,
@@ -144,12 +140,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
-  },
-  iconBoxLight: {
-    backgroundColor: '#EBE9E2',
-  },
-  iconBoxDark: {
-    backgroundColor: '#202B24',
+    borderWidth: 1,
   },
   metaCol: {
     flex: 1,
@@ -157,26 +148,13 @@ const styles = StyleSheet.create({
   merchantText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0E1A13',
     marginBottom: 2,
-  },
-  merchantTextDark: {
-    color: '#F2F7F4',
   },
   categoryText: {
     fontSize: 12.5,
-    color: '#5C6A61',
-  },
-  categoryTextDark: {
-    color: '#8A9C91',
   },
   amountText: {
     fontSize: 15.5,
     fontWeight: '800',
-    color: '#0E1A13',
-  },
-  amountTextDark: {
-    color: '#F2F7F4',
   },
 });
-

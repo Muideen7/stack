@@ -19,10 +19,13 @@ import { useAuthStore } from '../../store/authStore';
 import { useWalletStore } from '../../store/walletStore';
 import { useTransactionStore } from '../../store/transactionStore';
 import { useRecipientStore } from '../../store/recipientStore';
+import { getTheme } from '../../constants/theme';
 
 export default function DemoSettingsScreen() {
   const router = useRouter();
   const { colorScheme, setColorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const { profile, setThemeMode, toggleDemoHints, resetAll, setAuthenticated } = useAuthStore();
   const resetWallet = useWalletStore((s) => s.resetToSeed);
@@ -30,7 +33,6 @@ export default function DemoSettingsScreen() {
   const resetRecipients = useRecipientStore((s) => s.resetToSeed);
 
   const activeMode = profile.themeMode || 'system';
-  const isDark = colorScheme === 'dark';
 
   const handleSelectTheme = (mode: 'system' | 'light' | 'dark') => {
     Haptics.selectionAsync();
@@ -71,29 +73,31 @@ export default function DemoSettingsScreen() {
         edges={['bottom']}
         style={[
           styles.sheetContainer,
-          isDark && styles.sheetContainerDark,
+          {
+            backgroundColor: theme.raised,
+          },
         ]}
       >
         {/* Sheet Handle */}
-        <View style={[styles.dragHandle, isDark && styles.dragHandleDark]} />
+        <View style={[styles.dragHandle, { backgroundColor: theme.rule }]} />
 
         {/* Icon Badge */}
-        <View style={[styles.iconBadge, isDark && styles.iconBadgeDark]}>
+        <View style={[styles.iconBadge, { backgroundColor: theme.accentSoft }]}>
           <Faders
             size={22}
-            color={isDark ? '#4ADE80' : '#204E35'}
+            color={theme.accent}
             weight="bold"
           />
         </View>
 
         {/* Title */}
-        <Text style={[styles.sheetTitle, isDark && styles.sheetTitleDark]}>
+        <Text style={[styles.sheetTitle, { color: theme.ink }]}>
           Demo settings
         </Text>
 
         {/* Appearance Section */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+          <Text style={[styles.sectionTitle, { color: theme.ink2 }]}>
             APPEARANCE
           </Text>
         </View>
@@ -105,24 +109,24 @@ export default function DemoSettingsScreen() {
             onPress={() => handleSelectTheme('system')}
             style={[
               styles.themeCard,
-              isDark && styles.themeCardDark,
-              activeMode === 'system' && (isDark ? styles.themeCardActiveDark : styles.themeCardActive),
+              {
+                backgroundColor: activeMode === 'system' ? theme.accentSoft : theme.raisedSubtle,
+                borderColor: activeMode === 'system' ? theme.accent : theme.rule,
+              },
             ]}
           >
             <CircleHalf
               size={22}
-              color={
-                activeMode === 'system'
-                  ? (isDark ? '#4ADE80' : '#204E35')
-                  : (isDark ? '#8B9B90' : '#4C5850')
-              }
+              color={activeMode === 'system' ? theme.accent : theme.ink2}
               weight="fill"
             />
             <Text
               style={[
                 styles.themeCardText,
-                isDark && styles.themeCardTextDark,
-                activeMode === 'system' && (isDark ? styles.themeCardTextActiveDark : styles.themeCardTextActive),
+                {
+                  color: activeMode === 'system' ? theme.accent : theme.ink2,
+                  fontWeight: activeMode === 'system' ? '700' : '600',
+                },
               ]}
             >
               Auto
@@ -134,24 +138,24 @@ export default function DemoSettingsScreen() {
             onPress={() => handleSelectTheme('light')}
             style={[
               styles.themeCard,
-              isDark && styles.themeCardDark,
-              activeMode === 'light' && (isDark ? styles.themeCardActiveDark : styles.themeCardActive),
+              {
+                backgroundColor: activeMode === 'light' ? theme.accentSoft : theme.raisedSubtle,
+                borderColor: activeMode === 'light' ? theme.accent : theme.rule,
+              },
             ]}
           >
             <Sun
               size={22}
-              color={
-                activeMode === 'light'
-                  ? (isDark ? '#4ADE80' : '#204E35')
-                  : (isDark ? '#8B9B90' : '#4C5850')
-              }
+              color={activeMode === 'light' ? theme.accent : theme.ink2}
               weight="bold"
             />
             <Text
               style={[
                 styles.themeCardText,
-                isDark && styles.themeCardTextDark,
-                activeMode === 'light' && (isDark ? styles.themeCardTextActiveDark : styles.themeCardTextActive),
+                {
+                  color: activeMode === 'light' ? theme.accent : theme.ink2,
+                  fontWeight: activeMode === 'light' ? '700' : '600',
+                },
               ]}
             >
               Light
@@ -163,24 +167,24 @@ export default function DemoSettingsScreen() {
             onPress={() => handleSelectTheme('dark')}
             style={[
               styles.themeCard,
-              isDark && styles.themeCardDark,
-              activeMode === 'dark' && (isDark ? styles.themeCardActiveDark : styles.themeCardActive),
+              {
+                backgroundColor: activeMode === 'dark' ? theme.accentSoft : theme.raisedSubtle,
+                borderColor: activeMode === 'dark' ? theme.accent : theme.rule,
+              },
             ]}
           >
             <Moon
               size={22}
-              color={
-                activeMode === 'dark'
-                  ? (isDark ? '#4ADE80' : '#204E35')
-                  : (isDark ? '#8B9B90' : '#4C5850')
-              }
+              color={activeMode === 'dark' ? theme.accent : theme.ink2}
               weight="bold"
             />
             <Text
               style={[
                 styles.themeCardText,
-                isDark && styles.themeCardTextDark,
-                activeMode === 'dark' && (isDark ? styles.themeCardTextActiveDark : styles.themeCardTextActive),
+                {
+                  color: activeMode === 'dark' ? theme.accent : theme.ink2,
+                  fontWeight: activeMode === 'dark' ? '700' : '600',
+                },
               ]}
             >
               Dark
@@ -188,55 +192,57 @@ export default function DemoSettingsScreen() {
           </Pressable>
         </View>
 
-        {/* Preferences Group Card */}
-        <View style={[styles.preferencesCard, isDark && styles.preferencesCardDark]}>
-          {/* Demo hints toggle */}
+        {/* Demo Preferences Container Card */}
+        <View
+          style={[
+            styles.preferencesCard,
+            {
+              backgroundColor: theme.raisedSubtle,
+              borderColor: theme.rule,
+            },
+          ]}
+        >
+          {/* Row 1: Demo Hints Toggle */}
           <View style={styles.preferenceRow}>
             <View style={styles.preferenceIconCol}>
-              <Lightbulb size={20} color={isDark ? '#A1B5A8' : '#3E4B43'} />
+              <Lightbulb size={20} color={theme.ink2} weight="bold" />
             </View>
 
             <View style={styles.preferenceTextCol}>
-              <Text style={[styles.preferenceTitle, isDark && styles.preferenceTitleDark]}>
+              <Text style={[styles.preferenceTitle, { color: theme.ink }]}>
                 Demo hints
               </Text>
-              <Text style={[styles.preferenceSubtitle, isDark && styles.preferenceSubtitleDark]}>
+              <Text style={[styles.preferenceSubtitle, { color: theme.ink2 }]}>
                 Showing prefilled credentials and codes
               </Text>
             </View>
 
             <Switch
-              value={Boolean(profile.showDemoHints)}
+              value={profile.showDemoHints}
               onValueChange={handleToggleHints}
-              trackColor={{ false: isDark ? '#3D4F44' : '#D4D3CC', true: '#204E35' }}
+              trackColor={{ false: theme.rule, true: theme.accent }}
               thumbColor="#FFFFFF"
             />
           </View>
 
-          <View style={[styles.preferenceDivider, isDark && styles.preferenceDividerDark]} />
+          <View style={[styles.preferenceDivider, { backgroundColor: theme.rule }]} />
 
-          {/* Reset demo data action */}
-          <Pressable
-            onPress={handleResetData}
-            style={({ pressed }) => [
-              styles.preferenceRow,
-              { opacity: pressed ? 0.8 : 1 },
-            ]}
-          >
+          {/* Row 2: Reset Demo Data */}
+          <Pressable onPress={handleResetData} style={styles.preferenceRow}>
             <View style={styles.preferenceIconCol}>
-              <ArrowCounterClockwise size={20} color={isDark ? '#FBBF24' : '#7E6A47'} />
+              <ArrowCounterClockwise size={20} color="#D97706" weight="bold" />
             </View>
 
             <View style={styles.preferenceTextCol}>
-              <Text style={[styles.preferenceTitle, { color: isDark ? '#FBBF24' : '#6A583A' }]}>
+              <Text style={[styles.preferenceTitle, { color: '#D97706' }]}>
                 Reset demo data
               </Text>
-              <Text style={[styles.preferenceSubtitle, isDark && styles.preferenceSubtitleDark]}>
+              <Text style={[styles.preferenceSubtitle, { color: theme.ink2 }]}>
                 Restore everything and replay the intro
               </Text>
             </View>
 
-            <CaretRight size={18} color={isDark ? '#6B7E73' : '#8F9A92'} />
+            <CaretRight size={18} color={theme.ink2} />
           </Pressable>
         </View>
 
@@ -245,11 +251,14 @@ export default function DemoSettingsScreen() {
           onPress={handleClose}
           style={({ pressed }) => [
             styles.closeButton,
-            isDark && styles.closeButtonDark,
-            { opacity: pressed ? 0.9 : 1 },
+            {
+              backgroundColor: theme.raised,
+              borderColor: theme.rule,
+              opacity: pressed ? 0.88 : 1,
+            },
           ]}
         >
-          <Text style={[styles.closeButtonText, isDark && styles.closeButtonTextDark]}>
+          <Text style={[styles.closeButtonText, { color: theme.ink }]}>
             Close
           </Text>
         </Pressable>
@@ -268,7 +277,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   sheetContainer: {
-    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     paddingHorizontal: 24,
@@ -280,42 +288,26 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 20,
   },
-  sheetContainerDark: {
-    backgroundColor: '#161F1A',
-    shadowOpacity: 0.35,
-  },
   dragHandle: {
     width: 44,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#DCDAD3',
     alignSelf: 'center',
     marginBottom: 16,
-  },
-  dragHandleDark: {
-    backgroundColor: '#35463C',
   },
   iconBadge: {
     width: 42,
     height: 42,
-    borderRadius: 12,
-    backgroundColor: '#E2EDE6',
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
-  iconBadgeDark: {
-    backgroundColor: '#1E3527',
-  },
   sheetTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.3,
     marginBottom: 18,
-  },
-  sheetTitleDark: {
-    color: '#F2F7F4',
   },
   sectionHeader: {
     marginBottom: 10,
@@ -323,11 +315,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#556159',
     letterSpacing: 1.2,
-  },
-  sectionTitleDark: {
-    color: '#8A9B90',
   },
   themeRow: {
     flexDirection: 'row',
@@ -337,50 +325,21 @@ const styles = StyleSheet.create({
   themeCard: {
     flex: 1,
     height: 74,
-    borderRadius: 16,
-    backgroundColor: '#EBEAE4',
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: 'transparent',
     gap: 6,
-  },
-  themeCardDark: {
-    backgroundColor: '#202C25',
-  },
-  themeCardActive: {
-    backgroundColor: '#E2EDE6',
-    borderColor: '#204E35',
-  },
-  themeCardActiveDark: {
-    backgroundColor: '#1D3B2B',
-    borderColor: '#4ADE80',
   },
   themeCardText: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#4C5850',
-  },
-  themeCardTextDark: {
-    color: '#8A9B90',
-  },
-  themeCardTextActive: {
-    color: '#204E35',
-    fontWeight: '700',
-  },
-  themeCardTextActiveDark: {
-    color: '#4ADE80',
-    fontWeight: '700',
   },
   preferencesCard: {
-    backgroundColor: '#EBEAE4',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 14,
+    borderWidth: 1,
     marginBottom: 20,
-  },
-  preferencesCardDark: {
-    backgroundColor: '#202C25',
   },
   preferenceRow: {
     flexDirection: 'row',
@@ -399,32 +358,18 @@ const styles = StyleSheet.create({
   preferenceTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1A241E',
     marginBottom: 2,
-  },
-  preferenceTitleDark: {
-    color: '#F2F7F4',
   },
   preferenceSubtitle: {
     fontSize: 12.5,
-    color: '#5C6961',
     lineHeight: 16,
-  },
-  preferenceSubtitleDark: {
-    color: '#8A9B90',
   },
   preferenceDivider: {
     height: 1,
-    backgroundColor: '#DEDCD4',
     marginVertical: 10,
   },
-  preferenceDividerDark: {
-    backgroundColor: '#2E3D34',
-  },
   closeButton: {
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#D8D7D1',
     height: 52,
     borderRadius: 26,
     justifyContent: 'center',
@@ -435,16 +380,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  closeButtonDark: {
-    backgroundColor: '#202C25',
-    borderColor: '#35463C',
-  },
   closeButtonText: {
     fontSize: 15.5,
     fontWeight: '700',
-    color: '#0E1A13',
-  },
-  closeButtonTextDark: {
-    color: '#F2F7F4',
   },
 });

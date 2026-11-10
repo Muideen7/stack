@@ -8,6 +8,8 @@ import Svg, {
   Stop,
   Rect,
 } from 'react-native-svg';
+import { useColorScheme } from 'nativewind';
+import { getTheme } from '../../constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -16,15 +18,18 @@ interface AuthBackdropProps {
 }
 
 export const AuthBackdrop: React.FC<AuthBackdropProps> = ({ children }) => {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
+
   const w = SCREEN_WIDTH;
   const h = SCREEN_HEIGHT;
 
-  // 7 sediment contour wave lines
+  // 7 subtle architectural contour wave lines
   const lines = [0, 1, 2, 3, 4, 5, 6].map((i) => {
     const base = h * (0.24 + i * 0.095);
     const amp = h * 0.016 * (1 - i / 10);
     const strokeWidth = 1 + i * 0.2;
-    // Cubic bezier curve path
     const p1x = w * 0.25;
     const p1y = base + amp;
     const p2x = w * 0.75;
@@ -39,12 +44,11 @@ export const AuthBackdrop: React.FC<AuthBackdropProps> = ({ children }) => {
   });
 
   return (
-    <View style={styles.container}>
-      {/* Background SVG with warm paper, soft radial blooms, and sediment contours */}
+    <View style={[styles.container, { backgroundColor: theme.ground }]}>
       <View style={StyleSheet.absoluteFill}>
         <Svg width={w} height={h} style={StyleSheet.absoluteFill}>
           <Defs>
-            {/* Top-left soft green bloom */}
+            {/* Soft architectural top bloom */}
             <RadialGradient
               id="topBloom"
               cx="25%"
@@ -54,42 +58,26 @@ export const AuthBackdrop: React.FC<AuthBackdropProps> = ({ children }) => {
               fx="25%"
               fy="20%"
             >
-              <Stop offset="0%" stopColor="#2D5A43" stopOpacity={0.09} />
-              <Stop offset="60%" stopColor="#2D5A43" stopOpacity={0.03} />
-              <Stop offset="100%" stopColor="#F4F3EF" stopOpacity={0} />
-            </RadialGradient>
-
-            {/* Bottom-right soft warm bloom */}
-            <RadialGradient
-              id="bottomBloom"
-              cx="80%"
-              cy="75%"
-              rx="55%"
-              ry="40%"
-              fx="80%"
-              fy="75%"
-            >
-              <Stop offset="0%" stopColor="#8C9B8E" stopOpacity={0.08} />
-              <Stop offset="70%" stopColor="#8C9B8E" stopOpacity={0.02} />
-              <Stop offset="100%" stopColor="#F4F3EF" stopOpacity={0} />
+              <Stop offset="0%" stopColor={theme.accent} stopOpacity={isDark ? 0.06 : 0.04} />
+              <Stop offset="60%" stopColor={theme.accent} stopOpacity={0.01} />
+              <Stop offset="100%" stopColor={theme.ground} stopOpacity={0} />
             </RadialGradient>
           </Defs>
 
-          {/* Warm Paper Base */}
-          <Rect x={0} y={0} width={w} height={h} fill="#F4F3EF" />
+          {/* Crisp Ground */}
+          <Rect x={0} y={0} width={w} height={h} fill={theme.ground} />
 
-          {/* Blooms */}
+          {/* Bloom */}
           <Rect x={0} y={0} width={w} height={h} fill="url(#topBloom)" />
-          <Rect x={0} y={0} width={w} height={h} fill="url(#bottomBloom)" />
 
-          {/* Sediment Lines */}
+          {/* Architectural Lines */}
           {lines.map((l, idx) => (
             <Path
               key={idx}
               d={l.d}
-              stroke="#1C2D24"
+              stroke={theme.ink}
               strokeWidth={l.strokeWidth}
-              strokeOpacity={0.045}
+              strokeOpacity={isDark ? 0.04 : 0.035}
               fill="none"
               strokeLinecap="round"
             />
@@ -106,7 +94,6 @@ export const AuthBackdrop: React.FC<AuthBackdropProps> = ({ children }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F3EF',
   },
   content: {
     flex: 1,

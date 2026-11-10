@@ -19,19 +19,21 @@ import { useWalletStore } from '../store/walletStore';
 import { CardFace } from '../components/cards/CardFace';
 import { CardValidation } from '../utils/cardValidation';
 import { CardSkin, PaymentCard } from '../types/models';
+import { getTheme } from '../constants/theme';
 
 const SWATCH_SKINS: { id: CardSkin; color: string }[] = [
-  { id: 'forest', color: '#162F21' },
-  { id: 'moss', color: '#23583C' },
-  { id: 'sage', color: '#557261' },
-  { id: 'obsidian', color: '#1B221E' },
-  { id: 'bone', color: '#E2E0D5' },
+  { id: 'forest', color: '#0D1612' },
+  { id: 'moss', color: '#044331' },
+  { id: 'sage', color: '#111D2D' },
+  { id: 'obsidian', color: '#0C0E12' },
+  { id: 'bone', color: '#ECEFF2' },
 ];
 
 export default function AddCardScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const { addCard } = useWalletStore();
 
@@ -52,7 +54,7 @@ export default function AddCardScreen() {
     last4: last4.length === 4 && digitsOnly.length >= 4 ? last4 : '••••',
     brand,
     funding: 'credit',
-    holder: holder.trim() ? holder.toUpperCase() : 'YOUR NAME',
+    holder: holder.trim() ? holder.toUpperCase() : 'FRONTENDGEEK',
     expiryMonth: parseInt(expiryRaw.slice(0, 2), 10) || 12,
     expiryYear: parseInt(expiryRaw.slice(2, 4), 10) ? 2000 + parseInt(expiryRaw.slice(2, 4), 10) : 2029,
     nickname: nickname.trim() || 'Credit',
@@ -60,58 +62,36 @@ export default function AddCardScreen() {
     balanceMinor: 250000,
     currency: 'USD',
     frozen: false,
+    spendLimitMinor: null,
   };
 
   const isFormValid =
     digitsOnly.length >= 15 &&
-    holder.trim().length >= 2 &&
-    expiryRaw.length >= 4 &&
+    holder.trim().length > 0 &&
+    expiryRaw.length === 4 &&
     cvcRaw.length >= 3;
 
-  const handleExpiryChange = (text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, '').slice(0, 4);
-    setExpiryRaw(cleaned);
-  };
-
-  const formattedExpiryDisplay = () => {
-    if (expiryRaw.length <= 2) return expiryRaw;
-    return `${expiryRaw.slice(0, 2)}/${expiryRaw.slice(2, 4)}`;
-  };
-
-  const handleCreate = () => {
-    const numErr = CardValidation.validateNumber(numberRaw);
-    if (numErr) {
-      Alert.alert('Card Number Error', numErr);
-      return;
-    }
-    const expErr = CardValidation.validateExpiry(expiryRaw);
-    if (expErr) {
-      Alert.alert('Expiry Error', expErr);
-      return;
-    }
-    const cvcErr = CardValidation.validateCvc(cvcRaw, brand);
-    if (cvcErr) {
-      Alert.alert('Security Code Error', cvcErr);
-      return;
-    }
-    if (!holder.trim()) {
-      Alert.alert('Cardholder Required', 'Please enter the name on the card.');
+  const handleSubmit = () => {
+    if (!isFormValid) {
+      Alert.alert('Incomplete Details', 'Please fill in all card details.');
       return;
     }
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
     addCard({
-      last4: digitsOnly.slice(-4),
+      last4,
       brand,
       funding: 'credit',
       holder: holder.trim().toUpperCase(),
-      expiryMonth: previewCard.expiryMonth,
-      expiryYear: previewCard.expiryYear,
-      nickname: nickname.trim() || `${brand.toUpperCase()} Credit`,
+      expiryMonth: parseInt(expiryRaw.slice(0, 2), 10),
+      expiryYear: 2000 + parseInt(expiryRaw.slice(2, 4), 10),
+      nickname: nickname.trim() || (brand === 'visa' ? 'Visa' : 'Mastercard'),
       skin,
-      balanceMinor: 250000,
+      balanceMinor: 100000, // seed initial balance $1,000.00
       currency: 'USD',
       frozen: false,
+      spendLimitMinor: null,
     });
 
     router.back();
@@ -121,7 +101,7 @@ export default function AddCardScreen() {
     <SafeAreaView
       style={[
         styles.safeArea,
-        isDark ? styles.canvasDark : styles.canvasLight,
+        { backgroundColor: theme.ground },
       ]}
       edges={['top', 'bottom']}
     >
@@ -133,12 +113,12 @@ export default function AddCardScreen() {
         >
           <ArrowLeft
             size={22}
-            color={isDark ? '#F2F7F4' : '#0E1A13'}
+            color={theme.ink}
             weight="bold"
           />
         </Pressable>
-        <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
-          Add card
+        <Text style={[styles.headerTitle, { color: theme.ink }]}>
+          Add a card
         </Text>
         <View style={styles.headerSpacer} />
       </View>
@@ -147,36 +127,34 @@ export default function AddCardScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Live Card Preview */}
+        {/* Dynamic Card Preview */}
         <View style={styles.previewWrapper}>
-          <CardFace card={previewCard} showBalance={false} />
+          <CardFace card={previewCard} />
         </View>
 
-        {/* Card colour section */}
+        {/* Color / Skin Swatches */}
         <View style={styles.swatchSection}>
-          <Text style={[styles.sectionLabel, isDark && styles.sectionLabelDark]}>
-            Card colour
-          </Text>
+          <Text style={[styles.sectionLabel, { color: theme.ink2 }]}>Card skin</Text>
           <View style={styles.swatchesRow}>
-            {SWATCH_SKINS.map((item) => {
-              const isSelected = skin === item.id;
+            {SWATCH_SKINS.map((s) => {
+              const isSelected = skin === s.id;
               return (
                 <Pressable
-                  key={item.id}
+                  key={s.id}
                   onPress={() => {
                     Haptics.selectionAsync();
-                    setSkin(item.id);
+                    setSkin(s.id);
                   }}
                   style={[
                     styles.swatchCircle,
-                    { backgroundColor: item.color },
-                    item.id === 'bone' && styles.boneBorder,
+                    { backgroundColor: s.color },
+                    s.id === 'bone' && styles.boneBorder,
                   ]}
                 >
                   {isSelected && (
                     <Check
                       size={14}
-                      color={item.id === 'bone' ? '#0E1A13' : '#FFFFFF'}
+                      color={s.id === 'bone' ? '#0B0E14' : '#FFFFFF'}
                       weight="bold"
                     />
                   )}
@@ -186,102 +164,121 @@ export default function AddCardScreen() {
           </View>
         </View>
 
-        {/* Form Inputs */}
+        {/* Inputs */}
         <View style={styles.formSection}>
-          {/* Card Number */}
           <TextInput
             placeholder="Card number"
-            placeholderTextColor={isDark ? '#8A9C91' : '#8A968E'}
+            placeholderTextColor={theme.ink3}
             value={formattedNumber}
-            onChangeText={setNumberRaw}
+            onChangeText={(text) => setNumberRaw(text.replace(/\D/g, '').slice(0, 16))}
             keyboardType="number-pad"
             style={[
               styles.input,
-              isDark ? styles.inputDark : styles.inputLight,
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+                color: theme.ink,
+              },
             ]}
           />
 
-          {/* Expiry and Security Code Row */}
+          <TextInput
+            placeholder="Cardholder name"
+            placeholderTextColor={theme.ink3}
+            value={holder}
+            onChangeText={setHolder}
+            autoCapitalize="characters"
+            style={[
+              styles.input,
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+                color: theme.ink,
+              },
+            ]}
+          />
+
           <View style={styles.twoInputsRow}>
             <TextInput
-              placeholder="Expiry"
-              placeholderTextColor={isDark ? '#8A9C91' : '#8A968E'}
-              value={formattedExpiryDisplay()}
-              onChangeText={handleExpiryChange}
+              placeholder="MM/YY"
+              placeholderTextColor={theme.ink3}
+              value={expiryRaw}
+              onChangeText={(text) => setExpiryRaw(text.replace(/\D/g, '').slice(0, 4))}
               keyboardType="number-pad"
-              maxLength={5}
               style={[
                 styles.input,
                 styles.halfInput,
-                isDark ? styles.inputDark : styles.inputLight,
+                {
+                  backgroundColor: theme.raised,
+                  borderColor: theme.rule,
+                  color: theme.ink,
+                },
               ]}
             />
             <TextInput
-              placeholder="Security code"
-              placeholderTextColor={isDark ? '#8A9C91' : '#8A968E'}
+              placeholder="CVV"
+              placeholderTextColor={theme.ink3}
               value={cvcRaw}
-              onChangeText={setCvcRaw}
+              onChangeText={(text) => setCvcRaw(text.replace(/\D/g, '').slice(0, 4))}
               keyboardType="number-pad"
-              maxLength={4}
               secureTextEntry
               style={[
                 styles.input,
                 styles.halfInput,
-                isDark ? styles.inputDark : styles.inputLight,
+                {
+                  backgroundColor: theme.raised,
+                  borderColor: theme.rule,
+                  color: theme.ink,
+                },
               ]}
             />
           </View>
 
-          {/* Name on Card */}
           <TextInput
-            placeholder="Name on card"
-            placeholderTextColor={isDark ? '#8A9C91' : '#8A968E'}
-            value={holder}
-            onChangeText={setHolder}
-            autoCapitalize="words"
+            placeholder="Nickname (e.g. Everyday, Travel)"
+            placeholderTextColor={theme.ink3}
+            value={nickname}
+            onChangeText={setNickname}
             style={[
               styles.input,
-              isDark ? styles.inputDark : styles.inputLight,
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+                color: theme.ink,
+              },
             ]}
           />
 
-          {/* Card Name (Nickname) */}
-          <View>
-            <TextInput
-              placeholder="Card name"
-              placeholderTextColor={isDark ? '#8A9C91' : '#8A968E'}
-              value={nickname}
-              onChangeText={setNickname}
-              style={[
-                styles.input,
-                isDark ? styles.inputDark : styles.inputLight,
-              ]}
-            />
-            <Text style={[styles.helperText, isDark && styles.helperTextDark]}>
-              Optional. Shown on the card and in your wallet.
-            </Text>
-          </View>
+          <Text style={[styles.helperText, { color: theme.ink2 }]}>
+            Brand is auto-detected. We never store full card credentials unencrypted.
+          </Text>
 
-          {/* Encryption Guarantee Notice */}
           <View style={styles.noticeRow}>
-            <Lock size={15} color={isDark ? '#8A9C91' : '#5C6A61'} weight="regular" />
-            <Text style={[styles.noticeText, isDark && styles.noticeTextDark]}>
-              Your details are encrypted and never leave this device.
+            <Lock size={14} color={theme.ink2} />
+            <Text style={[styles.noticeText, { color: theme.ink2 }]}>
+              Protected with AES-256 hardware secure enclave.
             </Text>
           </View>
 
-          {/* Submit Button */}
+          {/* Primary CTA */}
           <Pressable
-            onPress={handleCreate}
+            onPress={handleSubmit}
             style={({ pressed }) => [
               styles.submitButton,
-              isFormValid
-                ? (isDark ? styles.submitValidDark : styles.submitValidLight)
-                : (isDark ? styles.submitMutedDark : styles.submitMutedLight),
-              { opacity: pressed ? 0.85 : 1 },
+              {
+                backgroundColor: isFormValid ? theme.accent : theme.raisedSubtle,
+                opacity: pressed ? 0.88 : 1,
+              },
             ]}
           >
-            <Text style={styles.submitButtonText}>Add card</Text>
+            <Text
+              style={[
+                styles.submitButtonText,
+                { color: isFormValid ? theme.onAccent : theme.ink3 },
+              ]}
+            >
+              Add Card
+            </Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -293,36 +290,27 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  canvasLight: {
-    backgroundColor: '#F4F3EF',
-  },
-  canvasDark: {
-    backgroundColor: '#0E1612',
-  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 10,
+    paddingBottom: 12,
   },
   backButton: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.3,
   },
-  headerTitleDark: {
-    color: '#F2F7F4',
-  },
   headerSpacer: {
-    width: 36,
+    width: 38,
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -336,12 +324,8 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 13,
-    color: '#5C6A61',
-    fontWeight: '500',
+    fontWeight: '600',
     marginBottom: 10,
-  },
-  sectionLabelDark: {
-    color: '#8A9C91',
   },
   swatchesRow: {
     flexDirection: 'row',
@@ -349,11 +333,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   swatchCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   boneBorder: {
     borderWidth: 1,
@@ -370,16 +356,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     borderWidth: 1,
   },
-  inputLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E2E0D8',
-    color: '#0E1A13',
-  },
-  inputDark: {
-    backgroundColor: '#16201B',
-    borderColor: '#26342B',
-    color: '#F2F7F4',
-  },
   twoInputsRow: {
     flexDirection: 'row',
     gap: 12,
@@ -389,12 +365,8 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 12.5,
-    color: '#5C6A61',
     marginTop: 6,
     paddingHorizontal: 4,
-  },
-  helperTextDark: {
-    color: '#8A9C91',
   },
   noticeRow: {
     flexDirection: 'row',
@@ -405,33 +377,21 @@ const styles = StyleSheet.create({
   },
   noticeText: {
     fontSize: 12.5,
-    color: '#5C6A61',
-  },
-  noticeTextDark: {
-    color: '#8A9C91',
   },
   submitButton: {
-    height: 52,
-    borderRadius: 26,
+    height: 54,
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
-  },
-  submitValidLight: {
-    backgroundColor: '#204E35',
-  },
-  submitValidDark: {
-    backgroundColor: '#225B3C',
-  },
-  submitMutedLight: {
-    backgroundColor: '#9FB2A6',
-  },
-  submitMutedDark: {
-    backgroundColor: '#354A3E',
+    marginTop: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 3,
   },
   submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15.5,
+    fontSize: 16,
     fontWeight: '700',
   },
 });

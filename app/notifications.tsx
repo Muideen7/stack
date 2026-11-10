@@ -13,11 +13,13 @@ import { useColorScheme } from 'nativewind';
 import * as Haptics from '@/utils/haptics';
 
 import { useNotificationStore } from '../store/notificationStore';
+import { getTheme } from '../constants/theme';
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const { notifications, markAsRead, markAllAsRead, unreadCount } = useNotificationStore();
 
@@ -55,36 +57,36 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.modalRoot}>
-      {/* Scrim backdrop */}
       <Pressable style={styles.scrimBackdrop} onPress={handleClose} />
 
-      {/* Bottom Sheet Container */}
       <SafeAreaView
         edges={['bottom']}
         style={[
           styles.sheetContainer,
-          isDark ? styles.sheetDark : styles.sheetLight,
+          {
+            backgroundColor: theme.raised,
+          },
         ]}
       >
-        {/* Handle */}
-        <View style={[styles.dragHandle, isDark && styles.dragHandleDark]} />
+        {/* Drag Handle */}
+        <View style={[styles.dragHandle, { backgroundColor: theme.rule }]} />
 
         {/* Badge Icon */}
-        <View style={[styles.iconBadge, isDark && styles.iconBadgeDark]}>
+        <View style={[styles.iconBadge, { backgroundColor: theme.accentSoft }]}>
           <Bell
             size={22}
-            color={isDark ? '#4ADE80' : '#204E35'}
+            color={theme.accent}
             weight="fill"
           />
         </View>
 
         {/* Title */}
-        <Text style={[styles.sheetTitle, isDark && styles.sheetTitleDark]}>
+        <Text style={[styles.sheetTitle, { color: theme.ink }]}>
           Notifications
         </Text>
 
         {/* Subtitle */}
-        <Text style={[styles.sheetSubtitle, isDark && styles.sheetSubtitleDark]}>
+        <Text style={[styles.sheetSubtitle, { color: theme.ink2 }]}>
           {unreadTotal} unread. Tap to read in full, swipe to delete.
         </Text>
 
@@ -108,9 +110,11 @@ export default function NotificationsScreen() {
                 }}
                 style={[
                   styles.notificationCard,
-                  isUnread
-                    ? (isDark ? styles.cardUnreadDark : styles.cardUnreadLight)
-                    : (isDark ? styles.cardReadDark : styles.cardReadLight),
+                  {
+                    backgroundColor: isUnread ? theme.raised : theme.raisedSubtle,
+                    borderColor: isUnread ? theme.accent : theme.rule,
+                    shadowOpacity: isUnread ? 0.06 : 0,
+                  },
                 ]}
               >
                 {/* Header Row */}
@@ -118,13 +122,13 @@ export default function NotificationsScreen() {
                   <View style={styles.cardHeaderLeft}>
                     <IconComp
                       size={18}
-                      color={isDark ? '#4ADE80' : '#204E35'}
+                      color={isUnread ? theme.accent : theme.ink2}
                       weight="bold"
                     />
                     <Text
                       style={[
                         styles.notificationTitle,
-                        isDark && styles.notificationTitleDark,
+                        { color: theme.ink },
                       ]}
                       numberOfLines={1}
                     >
@@ -137,16 +141,11 @@ export default function NotificationsScreen() {
                       <View
                         style={[
                           styles.unreadDot,
-                          isDark && styles.unreadDotDark,
+                          { backgroundColor: theme.accent },
                         ]}
                       />
                     )}
-                    <Text
-                      style={[
-                        styles.timeText,
-                        isDark && styles.timeTextDark,
-                      ]}
-                    >
+                    <Text style={[styles.timeText, { color: theme.ink3 }]}>
                       {timeLabel}
                     </Text>
                   </View>
@@ -156,7 +155,7 @@ export default function NotificationsScreen() {
                 <Text
                   style={[
                     styles.notificationBody,
-                    isDark && styles.notificationBodyDark,
+                    { color: theme.ink2 },
                   ]}
                   numberOfLines={2}
                 >
@@ -173,22 +172,27 @@ export default function NotificationsScreen() {
             onPress={handleMarkAll}
             style={({ pressed }) => [
               styles.primaryBtn,
-              isDark ? styles.primaryBtnDark : styles.primaryBtnLight,
-              { opacity: pressed ? 0.9 : 1 },
+              {
+                backgroundColor: theme.accent,
+                opacity: pressed ? 0.88 : 1,
+              },
             ]}
           >
-            <Text style={styles.primaryBtnText}>Mark all as read</Text>
+            <Text style={[styles.primaryBtnText, { color: theme.onAccent }]}>Mark all as read</Text>
           </Pressable>
 
           <Pressable
             onPress={handleClose}
             style={({ pressed }) => [
               styles.secondaryBtn,
-              isDark ? styles.secondaryBtnDark : styles.secondaryBtnLight,
-              { opacity: pressed ? 0.8 : 1 },
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+                opacity: pressed ? 0.8 : 1,
+              },
             ]}
           >
-            <Text style={[styles.secondaryBtnText, isDark && styles.secondaryBtnTextDark]}>
+            <Text style={[styles.secondaryBtnText, { color: theme.ink }]}>
               Close
             </Text>
           </Pressable>
@@ -220,102 +224,64 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 16,
   },
-  sheetLight: {
-    backgroundColor: '#FFFFFF',
-  },
-  sheetDark: {
-    backgroundColor: '#16201B',
-  },
   dragHandle: {
     width: 44,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#DCDAD3',
     alignSelf: 'center',
     marginBottom: 16,
-  },
-  dragHandleDark: {
-    backgroundColor: '#35463C',
   },
   iconBadge: {
     width: 42,
     height: 42,
-    borderRadius: 12,
-    backgroundColor: '#E2EDE6',
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
-  iconBadgeDark: {
-    backgroundColor: '#1E3527',
-  },
   sheetTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.3,
     marginBottom: 4,
   },
-  sheetTitleDark: {
-    color: '#F2F7F4',
-  },
   sheetSubtitle: {
     fontSize: 13.5,
-    color: '#5C6A61',
-    lineHeight: 18,
     marginBottom: 16,
-  },
-  sheetSubtitleDark: {
-    color: '#8A9C91',
   },
   scrollList: {
     maxHeight: 380,
   },
   scrollContent: {
     gap: 10,
-    paddingBottom: 8,
+    paddingBottom: 16,
   },
   notificationCard: {
     borderRadius: 18,
-    padding: 14,
+    padding: 16,
     borderWidth: 1,
-  },
-  cardUnreadLight: {
-    backgroundColor: '#E2EDE6',
-    borderColor: '#D4E2D9',
-  },
-  cardUnreadDark: {
-    backgroundColor: '#1A3326',
-    borderColor: '#244533',
-  },
-  cardReadLight: {
-    backgroundColor: '#EBE9E2',
-    borderColor: '#DFDCD4',
-  },
-  cardReadDark: {
-    backgroundColor: '#202A24',
-    borderColor: '#2D3931',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 2,
   },
   cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   cardHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     flex: 1,
-    marginRight: 12,
+    marginRight: 8,
   },
   notificationTitle: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '700',
-    color: '#0E1A13',
-  },
-  notificationTitleDark: {
-    color: '#F2F7F4',
+    flex: 1,
   },
   cardHeaderRight: {
     flexDirection: 'row',
@@ -326,31 +292,18 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#204E35',
-  },
-  unreadDotDark: {
-    backgroundColor: '#4ADE80',
   },
   timeText: {
-    fontSize: 12.5,
-    color: '#5C6A61',
-    fontWeight: '600',
-  },
-  timeTextDark: {
-    color: '#8A9C91',
+    fontSize: 12,
+    fontWeight: '500',
   },
   notificationBody: {
     fontSize: 13,
-    color: '#4B574F',
     lineHeight: 18,
-    marginLeft: 26,
-  },
-  notificationBodyDark: {
-    color: '#95A69B',
   },
   actionsStack: {
     gap: 10,
-    marginTop: 16,
+    marginTop: 8,
   },
   primaryBtn: {
     height: 52,
@@ -358,16 +311,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  primaryBtnLight: {
-    backgroundColor: '#204E35',
-  },
-  primaryBtnDark: {
-    backgroundColor: '#225B3C',
-  },
   primaryBtnText: {
     fontSize: 15.5,
     fontWeight: '700',
-    color: '#FFFFFF',
   },
   secondaryBtn: {
     height: 52,
@@ -376,20 +322,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
   },
-  secondaryBtnLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D8D7D1',
-  },
-  secondaryBtnDark: {
-    backgroundColor: '#202B24',
-    borderColor: '#35463C',
-  },
   secondaryBtnText: {
     fontSize: 15.5,
     fontWeight: '700',
-    color: '#0E1A13',
-  },
-  secondaryBtnTextDark: {
-    color: '#F2F7F4',
   },
 });

@@ -26,11 +26,13 @@ import * as Haptics from '@/utils/haptics';
 import { useAuthStore } from '../../store/authStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { StackMark } from '../../components/common/StackMark';
+import { getTheme } from '../../constants/theme';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = getTheme(isDark);
 
   const { profile, updateProfile } = useAuthStore();
   const { unreadCount } = useNotificationStore();
@@ -75,7 +77,7 @@ export default function ProfileScreen() {
     <SafeAreaView
       style={[
         styles.safeArea,
-        isDark ? styles.canvasDark : styles.canvasLight,
+        { backgroundColor: theme.ground },
       ]}
       edges={['top']}
     >
@@ -85,7 +87,7 @@ export default function ProfileScreen() {
       >
         {/* Top Header: Stack 3-slab brand logo */}
         <View style={styles.topLogoRow}>
-          <StackMark size={28} color={isDark ? '#4ADE80' : '#204E35'} />
+          <StackMark size={28} color={theme.accent} />
         </View>
 
         {/* User Identity Section */}
@@ -95,13 +97,13 @@ export default function ProfileScreen() {
             <View
               style={[
                 styles.avatarCircle,
-                isDark ? styles.avatarCircleDark : styles.avatarCircleLight,
+                { backgroundColor: theme.accentSoft },
               ]}
             >
               <Text
                 style={[
                   styles.avatarInitial,
-                  isDark ? styles.avatarInitialDark : styles.avatarInitialLight,
+                  { color: theme.accent },
                 ]}
               >
                 {profile.name.charAt(0).toUpperCase()}
@@ -111,12 +113,15 @@ export default function ProfileScreen() {
             <View
               style={[
                 styles.cameraBadge,
-                isDark ? styles.cameraBadgeDark : styles.cameraBadgeLight,
+                {
+                  backgroundColor: theme.raised,
+                  borderColor: theme.rule,
+                },
               ]}
             >
               <Camera
                 size={12}
-                color={isDark ? '#8A9C91' : '#5C6A61'}
+                color={theme.ink2}
                 weight="bold"
               />
             </View>
@@ -124,10 +129,10 @@ export default function ProfileScreen() {
 
           {/* User Name & Email */}
           <View style={styles.userNameMeta}>
-            <Text style={[styles.userName, isDark && styles.userNameDark]}>
+            <Text style={[styles.userName, { color: theme.ink }]}>
               {profile.name}
             </Text>
-            <Text style={[styles.userEmail, isDark && styles.userEmailDark]}>
+            <Text style={[styles.userEmail, { color: theme.ink2 }]}>
               {profile.email}
             </Text>
           </View>
@@ -135,14 +140,17 @@ export default function ProfileScreen() {
 
         {/* Section: ACCOUNT */}
         <View style={styles.sectionWrapper}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+          <Text style={[styles.sectionTitle, { color: theme.ink2 }]}>
             ACCOUNT
           </Text>
 
           <View
             style={[
               styles.groupCard,
-              isDark ? styles.groupCardDark : styles.groupCardLight,
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+              },
             ]}
           >
             {/* Edit Profile */}
@@ -157,33 +165,35 @@ export default function ProfileScreen() {
                 <View
                   style={[
                     styles.iconBox,
-                    isDark ? styles.iconBoxDark : styles.iconBoxLight,
+                    {
+                      backgroundColor: theme.raisedSubtle,
+                      borderColor: theme.rule,
+                    },
                   ]}
                 >
                   <User
                     size={20}
-                    color={isDark ? '#F2F7F4' : '#0E1A13'}
-                    weight="regular"
+                    color={theme.ink}
+                    weight="bold"
                   />
                 </View>
                 <View style={styles.rowTexts}>
-                  <Text style={[styles.rowTitle, isDark && styles.rowTitleDark]}>
+                  <Text style={[styles.rowTitle, { color: theme.ink }]}>
                     Edit profile
                   </Text>
-                  <Text style={[styles.rowSubtitle, isDark && styles.rowSubtitleDark]}>
+                  <Text style={[styles.rowSubtitle, { color: theme.ink2 }]}>
                     Name, email and handle
                   </Text>
                 </View>
               </View>
-
               <CaretRight
-                size={16}
-                color={isDark ? '#8A9C91' : '#5C6A61'}
+                size={18}
+                color={theme.ink2}
                 weight="bold"
               />
             </Pressable>
 
-            <View style={[styles.divider, isDark && styles.dividerDark]} />
+            <View style={[styles.divider, { backgroundColor: theme.rule }]} />
 
             {/* Notifications */}
             <Pressable
@@ -200,20 +210,23 @@ export default function ProfileScreen() {
                 <View
                   style={[
                     styles.iconBox,
-                    isDark ? styles.iconBoxDark : styles.iconBoxLight,
+                    {
+                      backgroundColor: theme.raisedSubtle,
+                      borderColor: theme.rule,
+                    },
                   ]}
                 >
                   <Bell
                     size={20}
-                    color={isDark ? '#F2F7F4' : '#0E1A13'}
-                    weight="regular"
+                    color={theme.ink}
+                    weight="bold"
                   />
                 </View>
                 <View style={styles.rowTexts}>
-                  <Text style={[styles.rowTitle, isDark && styles.rowTitleDark]}>
+                  <Text style={[styles.rowTitle, { color: theme.ink }]}>
                     Notifications
                   </Text>
-                  <Text style={[styles.rowSubtitle, isDark && styles.rowSubtitleDark]}>
+                  <Text style={[styles.rowSubtitle, { color: theme.ink2 }]}>
                     {unreadTotal} waiting for you
                   </Text>
                 </View>
@@ -221,18 +234,15 @@ export default function ProfileScreen() {
 
               <View style={styles.rowRightBadgeGroup}>
                 {unreadTotal > 0 && (
-                  <View
-                    style={[
-                      styles.unreadCountBadge,
-                      isDark && styles.unreadCountBadgeDark,
-                    ]}
-                  >
-                    <Text style={styles.unreadCountText}>{unreadTotal}</Text>
+                  <View style={[styles.unreadCountBadge, { backgroundColor: theme.accent }]}>
+                    <Text style={styles.unreadCountText}>
+                      {unreadTotal}
+                    </Text>
                   </View>
                 )}
                 <CaretRight
-                  size={16}
-                  color={isDark ? '#8A9C91' : '#5C6A61'}
+                  size={18}
+                  color={theme.ink2}
                   weight="bold"
                 />
               </View>
@@ -242,20 +252,23 @@ export default function ProfileScreen() {
 
         {/* Section: APP */}
         <View style={styles.sectionWrapper}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+          <Text style={[styles.sectionTitle, { color: theme.ink2 }]}>
             APP
           </Text>
 
           <View
             style={[
               styles.groupCard,
-              isDark ? styles.groupCardDark : styles.groupCardLight,
+              {
+                backgroundColor: theme.raised,
+                borderColor: theme.rule,
+              },
             ]}
           >
-            {/* Appearance */}
+            {/* Appearance / Theme Settings */}
             <Pressable
               onPress={() => {
-                Haptics.selectionAsync();
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push('/(auth)/demo-settings');
               }}
               style={({ pressed }) => [
@@ -267,28 +280,30 @@ export default function ProfileScreen() {
                 <View
                   style={[
                     styles.iconBox,
-                    isDark ? styles.iconBoxDark : styles.iconBoxLight,
+                    {
+                      backgroundColor: theme.raisedSubtle,
+                      borderColor: theme.rule,
+                    },
                   ]}
                 >
                   <Palette
                     size={20}
-                    color={isDark ? '#F2F7F4' : '#0E1A13'}
-                    weight="regular"
+                    color={theme.ink}
+                    weight="bold"
                   />
                 </View>
                 <View style={styles.rowTexts}>
-                  <Text style={[styles.rowTitle, isDark && styles.rowTitleDark]}>
+                  <Text style={[styles.rowTitle, { color: theme.ink }]}>
                     Appearance
                   </Text>
-                  <Text style={[styles.rowSubtitle, isDark && styles.rowSubtitleDark]}>
+                  <Text style={[styles.rowSubtitle, { color: theme.ink2 }]}>
                     {currentThemeLabel}
                   </Text>
                 </View>
               </View>
-
               <CaretRight
-                size={16}
-                color={isDark ? '#8A9C91' : '#5C6A61'}
+                size={18}
+                color={theme.ink2}
                 weight="bold"
               />
             </Pressable>
@@ -296,7 +311,7 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      {/* Edit Profile Modal */}
+      {/* Edit Profile Modal Sheet */}
       <Modal visible={editModalVisible} transparent animationType="slide">
         <View style={styles.modalRoot}>
           <Pressable
@@ -307,60 +322,80 @@ export default function ProfileScreen() {
             edges={['bottom']}
             style={[
               styles.modalSheet,
-              isDark ? styles.modalSheetDark : styles.modalSheetLight,
+              {
+                backgroundColor: theme.raised,
+              },
             ]}
           >
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, isDark && styles.modalTitleDark]}>
-                Edit profile
+              <Text style={[styles.modalTitle, { color: theme.ink }]}>
+                Edit Profile
               </Text>
               <Pressable onPress={() => setEditModalVisible(false)}>
-                <X size={20} color={isDark ? '#8A9C91' : '#5C6A61'} />
+                <X size={20} color={theme.ink2} />
               </Pressable>
             </View>
 
             <View style={styles.inputsStack}>
               <View>
-                <Text style={[styles.inputLabel, isDark && styles.inputLabelDark]}>
-                  Name
+                <Text style={[styles.inputLabel, { color: theme.ink2 }]}>
+                  Full Name
                 </Text>
                 <TextInput
                   value={nameInput}
                   onChangeText={setNameInput}
+                  placeholder="Your Name"
+                  placeholderTextColor={theme.ink3}
                   style={[
                     styles.textInput,
-                    isDark ? styles.textInputDark : styles.textInputLight,
+                    {
+                      backgroundColor: theme.raised,
+                      borderColor: theme.rule,
+                      color: theme.ink,
+                    },
                   ]}
                 />
               </View>
 
               <View>
-                <Text style={[styles.inputLabel, isDark && styles.inputLabelDark]}>
-                  Email
-                </Text>
-                <TextInput
-                  value={emailInput}
-                  onChangeText={setEmailInput}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={[
-                    styles.textInput,
-                    isDark ? styles.textInputDark : styles.textInputLight,
-                  ]}
-                />
-              </View>
-
-              <View>
-                <Text style={[styles.inputLabel, isDark && styles.inputLabelDark]}>
+                <Text style={[styles.inputLabel, { color: theme.ink2 }]}>
                   Handle
                 </Text>
                 <TextInput
                   value={handleInput}
                   onChangeText={setHandleInput}
+                  placeholder="@handle"
+                  placeholderTextColor={theme.ink3}
                   autoCapitalize="none"
                   style={[
                     styles.textInput,
-                    isDark ? styles.textInputDark : styles.textInputLight,
+                    {
+                      backgroundColor: theme.raised,
+                      borderColor: theme.rule,
+                      color: theme.ink,
+                    },
+                  ]}
+                />
+              </View>
+
+              <View>
+                <Text style={[styles.inputLabel, { color: theme.ink2 }]}>
+                  Email
+                </Text>
+                <TextInput
+                  value={emailInput}
+                  onChangeText={setEmailInput}
+                  placeholder="your.email@example.com"
+                  placeholderTextColor={theme.ink3}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  style={[
+                    styles.textInput,
+                    {
+                      backgroundColor: theme.raised,
+                      borderColor: theme.rule,
+                      color: theme.ink,
+                    },
                   ]}
                 />
               </View>
@@ -368,9 +403,15 @@ export default function ProfileScreen() {
 
             <Pressable
               onPress={handleSaveProfile}
-              style={[styles.saveBtn, styles.saveBtnLight]}
+              style={({ pressed }) => [
+                styles.saveBtn,
+                {
+                  backgroundColor: theme.accent,
+                  opacity: pressed ? 0.88 : 1,
+                },
+              ]}
             >
-              <Text style={styles.saveBtnText}>Save</Text>
+              <Text style={[styles.saveBtnText, { color: theme.onAccent }]}>Save Changes</Text>
             </Pressable>
           </SafeAreaView>
         </View>
@@ -383,19 +424,13 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  canvasLight: {
-    backgroundColor: '#F4F3EF',
-  },
-  canvasDark: {
-    backgroundColor: '#0E1612',
-  },
   scrollContent: {
     paddingHorizontal: 24,
     paddingBottom: 110,
   },
   topLogoRow: {
     paddingTop: 16,
-    paddingBottom: 24,
+    paddingBottom: 20,
   },
   userHeaderSection: {
     flexDirection: 'row',
@@ -413,21 +448,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  avatarCircleLight: {
-    backgroundColor: '#D6E6DC',
-  },
-  avatarCircleDark: {
-    backgroundColor: '#1E3527',
-  },
   avatarInitial: {
     fontSize: 26,
     fontWeight: '800',
-  },
-  avatarInitialLight: {
-    color: '#204E35',
-  },
-  avatarInitialDark: {
-    color: '#4ADE80',
   },
   cameraBadge: {
     position: 'absolute',
@@ -440,33 +463,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
   },
-  cameraBadgeLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#ECEAE4',
-  },
-  cameraBadgeDark: {
-    backgroundColor: '#26342B',
-    borderColor: '#16201B',
-  },
   userNameMeta: {
     flex: 1,
   },
   userName: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#0E1A13',
     letterSpacing: -0.3,
-  },
-  userNameDark: {
-    color: '#F2F7F4',
   },
   userEmail: {
     fontSize: 13.5,
-    color: '#5C6A61',
     marginTop: 2,
-  },
-  userEmailDark: {
-    color: '#8A9C91',
   },
   sectionWrapper: {
     marginBottom: 22,
@@ -474,13 +481,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#556159',
     letterSpacing: 1.2,
     marginBottom: 8,
     paddingLeft: 4,
-  },
-  sectionTitleDark: {
-    color: '#8A9B90',
   },
   groupCard: {
     borderRadius: 22,
@@ -492,14 +495,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
-  },
-  groupCardLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#ECEAE4',
-  },
-  groupCardDark: {
-    backgroundColor: '#16201B',
-    borderColor: '#26342B',
   },
   rowItem: {
     flexDirection: 'row',
@@ -519,12 +514,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
-  },
-  iconBoxLight: {
-    backgroundColor: '#EBE9E2',
-  },
-  iconBoxDark: {
-    backgroundColor: '#202B24',
+    borderWidth: 1,
   },
   rowTexts: {
     flex: 1,
@@ -532,18 +522,10 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0E1A13',
-  },
-  rowTitleDark: {
-    color: '#F2F7F4',
   },
   rowSubtitle: {
     fontSize: 12.5,
-    color: '#5C6A61',
     marginTop: 2,
-  },
-  rowSubtitleDark: {
-    color: '#8A9C91',
   },
   rowRightBadgeGroup: {
     flexDirection: 'row',
@@ -554,12 +536,8 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#204E35',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  unreadCountBadgeDark: {
-    backgroundColor: '#225B3C',
   },
   unreadCountText: {
     fontSize: 11,
@@ -568,10 +546,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#ECEAE4',
-  },
-  dividerDark: {
-    backgroundColor: '#26342B',
   },
   modalRoot: {
     flex: 1,
@@ -588,12 +562,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 28,
   },
-  modalSheetLight: {
-    backgroundColor: '#FFFFFF',
-  },
-  modalSheetDark: {
-    backgroundColor: '#16201B',
-  },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -603,10 +571,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#0E1A13',
-  },
-  modalTitleDark: {
-    color: '#F2F7F4',
   },
   inputsStack: {
     gap: 14,
@@ -615,12 +579,8 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#5C6A61',
     marginBottom: 6,
     textTransform: 'uppercase',
-  },
-  inputLabelDark: {
-    color: '#8A9C91',
   },
   textInput: {
     height: 48,
@@ -629,28 +589,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     borderWidth: 1,
   },
-  textInputLight: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E2E0D8',
-    color: '#0E1A13',
-  },
-  textInputDark: {
-    backgroundColor: '#202B24',
-    borderColor: '#2D3C33',
-    color: '#F2F7F4',
-  },
   saveBtn: {
     height: 52,
     borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  saveBtnLight: {
-    backgroundColor: '#204E35',
-  },
   saveBtnText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
   },
 });

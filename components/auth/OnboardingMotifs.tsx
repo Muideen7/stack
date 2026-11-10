@@ -9,16 +9,17 @@ import Animated, {
   withSpring,
   Easing,
 } from 'react-native-reanimated';
+import { PALETTE } from '../../constants/theme';
 
 interface MotifProps {
-  active: boolean;
+  active?: boolean;
 }
 
 /**
  * Slide 1 Motif: Exact 3 vertical stacked cards from Image 1
- * Back (Sage), Middle (Moss), Front (Deep Forest) with silver EMV chips & dots.
+ * Back (Titanium Obsidian), Middle (Royal Sapphire), Front (Jewel Emerald) with EMV chips & dots.
  */
-export const StackMotif: React.FC<MotifProps> = ({ active }) => {
+export const StackMotif: React.FC<MotifProps> = ({ active = true }) => {
   const lift = useSharedValue(0);
 
   useEffect(() => {
@@ -46,11 +47,11 @@ export const StackMotif: React.FC<MotifProps> = ({ active }) => {
 
   return (
     <View style={styles.stackWrapper}>
-      {/* Card 1: Back (Sage) */}
+      {/* Card 1: Back (Titanium Obsidian) */}
       <Animated.View
         style={[
           styles.cardBase,
-          styles.sageCard,
+          styles.backCard,
           backStyle,
           { top: 0, zIndex: 1 },
         ]}
@@ -58,11 +59,11 @@ export const StackMotif: React.FC<MotifProps> = ({ active }) => {
         <View style={styles.chip} />
       </Animated.View>
 
-      {/* Card 2: Middle (Moss) */}
+      {/* Card 2: Middle (Royal Midnight Sapphire) */}
       <Animated.View
         style={[
           styles.cardBase,
-          styles.mossCard,
+          styles.midCard,
           midStyle,
           { top: 38, zIndex: 2 },
         ]}
@@ -70,17 +71,17 @@ export const StackMotif: React.FC<MotifProps> = ({ active }) => {
         <View style={styles.chip} />
       </Animated.View>
 
-      {/* Card 3: Front (Deep Forest) */}
+      {/* Card 3: Front (Deep Jewel Emerald) */}
       <Animated.View
         style={[
           styles.cardBase,
-          styles.forestCard,
+          styles.frontCard,
           frontStyle,
           { top: 76, zIndex: 3 },
         ]}
       >
         <View style={styles.chip} />
-        {/* Embossed dots bottom left */}
+        {/* 4 dots lower-left corner */}
         <View style={styles.dotsRow}>
           <View style={styles.dot} />
           <View style={styles.dot} />
@@ -93,60 +94,64 @@ export const StackMotif: React.FC<MotifProps> = ({ active }) => {
 };
 
 /**
- * Slide 2 Motif: Exact 5-segment spending bar with 2-column legend from Image 2
+ * Slide 2 Motif: 5-category spending rollup bar matching Image 2
  */
-export const SpendingMotif: React.FC<MotifProps> = ({ active }) => {
-  const barWidth = useSharedValue(active ? 1 : 0);
-
-  useEffect(() => {
-    barWidth.value = withTiming(active ? 1 : 0, {
-      duration: 600,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [active]);
-
-  const animatedBarStyle = useAnimatedStyle(() => ({
-    transform: [{ scaleX: withSpring(active ? 1 : 0.85, { damping: 14 }) }],
-    opacity: withTiming(active ? 1 : 0.3, { duration: 300 }),
-  }));
+export const SpendingMotif: React.FC<MotifProps> = ({ active = true }) => {
+  const categories = [
+    { name: 'Groceries', flex: 0.38, color: PALETTE.spending.groceries },
+    { name: 'Transfers', flex: 0.27, color: PALETTE.spending.transfers },
+    { name: 'Food', flex: 0.13, color: PALETTE.spending.food },
+    { name: 'Transport', flex: 0.12, color: PALETTE.spending.transport },
+    { name: 'Other', flex: 0.10, color: PALETTE.spending.other },
+  ];
 
   return (
     <View style={styles.spendingWrapper}>
-      {/* 5-segment pill bar */}
-      <Animated.View style={[styles.barContainer, animatedBarStyle]}>
-        <View style={[styles.barSegment, { width: '35%', backgroundColor: '#1E4331', borderTopLeftRadius: 10, borderBottomLeftRadius: 10 }]} />
-        <View style={[styles.barSegment, { width: '25%', backgroundColor: '#2C5E44' }]} />
-        <View style={[styles.barSegment, { width: '18%', backgroundColor: '#3E7E5E' }]} />
-        <View style={[styles.barSegment, { width: '12%', backgroundColor: '#5F9E7E' }]} />
-        <View style={[styles.barSegment, { width: '10%', backgroundColor: '#8BC2A6', borderTopRightRadius: 10, borderBottomRightRadius: 10 }]} />
-      </Animated.View>
+      {/* 5-segment rounded bar */}
+      <View style={styles.barContainer}>
+        {categories.map((c, i) => (
+          <View
+            key={c.name}
+            style={[
+              styles.barSegment,
+              {
+                flex: c.flex,
+                backgroundColor: c.color,
+                borderTopLeftRadius: i === 0 ? 10 : 0,
+                borderBottomLeftRadius: i === 0 ? 10 : 0,
+                borderTopRightRadius: i === categories.length - 1 ? 10 : 0,
+                borderBottomRightRadius: i === categories.length - 1 ? 10 : 0,
+                marginRight: i < categories.length - 1 ? 2.5 : 0,
+              },
+            ]}
+          />
+        ))}
+      </View>
 
-      {/* Two-column category list */}
+      {/* 2-column Legend */}
       <View style={styles.legendContainer}>
-        {/* Left Column */}
         <View style={styles.legendColumn}>
           <View style={styles.legendRow}>
-            <View style={[styles.legendDot, { backgroundColor: '#1E4331' }]} />
+            <View style={[styles.legendDot, { backgroundColor: PALETTE.spending.groceries }]} />
             <Text style={styles.legendLabel}>Groceries</Text>
           </View>
           <View style={styles.legendRow}>
-            <View style={[styles.legendDot, { backgroundColor: '#3E7E5E' }]} />
+            <View style={[styles.legendDot, { backgroundColor: PALETTE.spending.food }]} />
             <Text style={styles.legendLabel}>Food</Text>
           </View>
           <View style={styles.legendRow}>
-            <View style={[styles.legendDot, { backgroundColor: '#8BC2A6' }]} />
+            <View style={[styles.legendDot, { backgroundColor: PALETTE.spending.other }]} />
             <Text style={styles.legendLabel}>Other</Text>
           </View>
         </View>
 
-        {/* Right Column */}
         <View style={styles.legendColumn}>
           <View style={styles.legendRow}>
-            <View style={[styles.legendDot, { backgroundColor: '#2C5E44' }]} />
+            <View style={[styles.legendDot, { backgroundColor: PALETTE.spending.transfers }]} />
             <Text style={styles.legendLabel}>Transfers</Text>
           </View>
           <View style={styles.legendRow}>
-            <View style={[styles.legendDot, { backgroundColor: '#5F9E7E' }]} />
+            <View style={[styles.legendDot, { backgroundColor: PALETTE.spending.transport }]} />
             <Text style={styles.legendLabel}>Transport</Text>
           </View>
         </View>
@@ -156,38 +161,28 @@ export const SpendingMotif: React.FC<MotifProps> = ({ active }) => {
 };
 
 /**
- * Slide 3 Motif: Exact single privacy card with lock & dots from Image 3
+ * Slide 3 Motif: Privacy Card with masked PAN and keyhole lock matching Image 3
  */
-export const PrivacyMotif: React.FC<MotifProps> = ({ active }) => {
+export const PrivacyMotif: React.FC<MotifProps> = ({ active = true }) => {
   return (
     <View style={styles.privacyWrapper}>
       <View style={styles.privacyCard}>
-        {/* Closed padlock at top right */}
+        {/* Top-Right: Keyhole Lock Icon */}
         <View style={styles.lockContainer}>
-          <Svg width={18} height={22} viewBox="0 0 18 22" fill="none">
-            {/* Shackle */}
+          <Svg width={22} height={26} viewBox="0 0 24 28" fill="none">
             <Path
-              d="M 4 10 V 5 C 4 2.2 6.2 0 9 0 C 11.8 0 14 2.2 14 5 V 10"
-              stroke="#FFFFFF"
-              strokeWidth={2.4}
-              strokeLinecap="round"
-            />
-            {/* Body */}
-            <Path
-              d="M 1 10 H 17 C 17.5 10 18 10.5 18 11 V 21 C 18 21.5 17.5 22 17 22 H 1 C 0.5 22 0 21.5 0 21 V 11 C 0 10.5 0.5 10 1 10 Z"
+              d="M12 2C8.686 2 6 4.686 6 8V11H4C2.895 11 2 11.895 2 13V24C2 25.105 2.895 26 4 26H20C21.105 26 22 25.105 22 24V13C22 11.895 21.105 11 20 11H18V8C18 4.686 15.314 2 12 2ZM9 8C9 6.343 10.343 5 12 5C13.657 5 15 6.343 15 8V11H9V8Z"
               fill="#FFFFFF"
             />
           </Svg>
         </View>
 
-        {/* Centered Masked Number */}
+        {/* Card Number Mask */}
         <View style={styles.numberRow}>
-          <Text style={styles.dotsText}>
-            • • • • • • • • • • • •
-          </Text>
-          <Text style={styles.tailDigits}>
-            4 2 4 2
-          </Text>
+          <Text style={styles.dotsText}>••••</Text>
+          <Text style={styles.dotsText}>••••</Text>
+          <Text style={styles.dotsText}>••••</Text>
+          <Text style={styles.tailDigits}>8152</Text>
         </View>
       </View>
     </View>
@@ -197,36 +192,34 @@ export const PrivacyMotif: React.FC<MotifProps> = ({ active }) => {
 const styles = StyleSheet.create({
   // Stack Motif Styles
   stackWrapper: {
-    width: 236,
-    height: 226,
-    alignSelf: 'center',
+    width: 200,
+    height: 236,
     position: 'relative',
-    marginTop: 10,
-    marginBottom: 20,
+    alignSelf: 'center',
+    marginVertical: 10,
   },
   cardBase: {
-    width: 236,
-    height: 148,
-    borderRadius: 16,
-    padding: 14,
     position: 'absolute',
-    left: 0,
+    width: 200,
+    height: 154,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.18,
-    shadowRadius: 18,
+    shadowRadius: 16,
     elevation: 8,
-    borderWidth: 0.8,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
-  sageCard: {
-    backgroundColor: '#586E5E',
+  backCard: {
+    backgroundColor: '#0F141C',
   },
-  mossCard: {
-    backgroundColor: '#275239',
+  midCard: {
+    backgroundColor: '#111D2D',
   },
-  forestCard: {
-    backgroundColor: '#162C21',
+  frontCard: {
+    backgroundColor: '#044331',
     justifyContent: 'space-between',
   },
   chip: {
@@ -261,7 +254,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 11,
     overflow: 'hidden',
-    backgroundColor: '#E5E4DE',
+    backgroundColor: 'rgba(15, 23, 42, 0.08)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
@@ -294,7 +287,6 @@ const styles = StyleSheet.create({
   legendLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1A241E',
     letterSpacing: -0.2,
   },
 
@@ -308,8 +300,8 @@ const styles = StyleSheet.create({
   privacyCard: {
     width: 278,
     height: 174,
-    borderRadius: 20,
-    backgroundColor: '#162C21',
+    borderRadius: 22,
+    backgroundColor: '#044331',
     padding: 22,
     justifyContent: 'space-between',
     shadowColor: '#000',
@@ -317,8 +309,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.22,
     shadowRadius: 22,
     elevation: 10,
-    borderWidth: 0.8,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   lockContainer: {
     alignSelf: 'flex-end',
