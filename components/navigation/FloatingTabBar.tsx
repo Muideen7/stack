@@ -1,13 +1,34 @@
 // components/navigation/FloatingTabBar.tsx
 import * as Haptics from '@/utils/haptics';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useColorScheme } from 'nativewind';
 import { CreditCard, House, User } from 'phosphor-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { getTheme } from '../../constants/theme';
 
-export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export interface FloatingTabBarProps {
+  state: {
+    index: number;
+    routes: Array<{ key: string; name: string; params?: any }>;
+  };
+  descriptors: Record<string, { options: { title?: string } }>;
+  navigation?: {
+    emit: (event: any) => any;
+    navigate: (name: string) => void;
+  };
+  emitter?: {
+    emit: (event: any) => any;
+  };
+  navigateToTab?: (routeKey: string) => void;
+}
+
+export function FloatingTabBar({
+  state,
+  descriptors,
+  navigation,
+  emitter,
+  navigateToTab,
+}: FloatingTabBarProps) {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const theme = getTheme(isDark);
@@ -23,20 +44,33 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
           },
         ]}
       >
-        {state.routes.map((route, index) => {
+        {state.routes.map((route: { key: string; name: string }, index: number) => {
           const isFocused = state.index === index;
-          const { options } = descriptors[route.key];
+          const descriptor = descriptors[route.key];
+          const options = descriptor?.options || {};
 
           const onPress = () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
+            const event = navigation
+              ? navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                })
+              : emitter
+              ? emitter.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                })
+              : { defaultPrevented: false };
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+            if (!isFocused && !event?.defaultPrevented) {
+              if (navigateToTab) {
+                navigateToTab(route.key);
+              } else if (navigation) {
+                navigation.navigate(route.name);
+              }
             }
           };
 
